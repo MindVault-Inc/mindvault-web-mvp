@@ -1,1 +1,0 @@
-export { XataClient, getXataClient } from './xata'; 
