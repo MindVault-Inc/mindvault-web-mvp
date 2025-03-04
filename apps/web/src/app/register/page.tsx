@@ -4,9 +4,6 @@ import { FilledButton } from "@/components/ui/buttons/FilledButton";
 import { NotificationDialog } from "@/components/ui/feedback/NotificationError";
 import { Input } from "@/components/ui/base/input";
 import { COUNTRIES, type CountryCode } from "@/constants/countries";
-import { MiniKit } from "@worldcoin/minikit-js";
-import type { RequestPermissionPayload } from "@worldcoin/minikit-js";
-import { Permission } from "@worldcoin/minikit-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useState } from "react";
@@ -52,139 +49,109 @@ export default function Register() {
     }));
   }, [userId, router]);
 
-  // Function to request notification permission
-  const requestPermission = async () => {
-    const requestPermissionPayload: RequestPermissionPayload = {
-      permission: Permission.Notifications,
-    };
-    try {
-      const payload = await MiniKit.commandsAsync.requestPermission(
-        requestPermissionPayload,
-      );
-      return payload;
-    } catch (error) {
-      console.error("Permission request failed:", error);
-      if (error instanceof Error) {
-        setErrorCode(error.message as NotificationErrorCode);
-      }
-      return null;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      // Get username from MiniKit if available
-      const username = MiniKit.user?.username;
-
-      // Use the wallet address from form data (set from URL parameter)
-      const walletAddress = formData.wallet_address;
-
-      if (!walletAddress) {
-        throw new Error("No wallet address provided");
-      }
-
-      // Get form data
-      const userData = {
-        name: formData.name,
-        last_name: formData.lastName,
-        email: formData.email,
-        age: Number.parseInt(formData.age),
-        subscription: false,
-        wallet_address: walletAddress,
-        username,
-        country:
-          COUNTRIES.find((c) => c.countryCode === formData.country)?.country ||
-          "Costa Rica",
-      };
-
-      // Client-side validation
-      if (
-        !userData.name ||
-        userData.name.length < 2 ||
-        userData.name.length > 50
-      ) {
-        throw new Error("Name must be between 2 and 50 characters");
-      }
-
-      if (
-        !userData.last_name ||
-        userData.last_name.length < 2 ||
-        userData.last_name.length > 50
-      ) {
-        throw new Error("Last name must be between 2 and 50 characters");
-      }
-
-      if (
-        !userData.email ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)
-      ) {
-        throw new Error("Please enter a valid email address");
-      }
-
-      if (!userData.age || userData.age < 18 || userData.age > 120) {
-        throw new Error("Age must be between 18 and 120");
-      }
-
-      if (!/^0x[a-fA-F0-9]{40}$/.test(userData.wallet_address)) {
-        throw new Error("Invalid wallet address format");
-      }
-
-      // Create user
-      const response = await fetch("/api/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to create user profile");
-      }
-
-      // Create session
-      const sessionResponse = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          walletAddress,
-          isSiweVerified: true,
-        }),
-      });
-
-      if (!sessionResponse.ok) {
-        const sessionError = await sessionResponse.json();
-        throw new Error(sessionError.error || "Failed to create session");
-      }
-
-      // Request notification permission after successful registration
-      await requestPermission();
-
-      // Set registration completion flag and redirect to welcome page
-      sessionStorage.setItem("registration_complete", "true");
-      router.push("/welcome");
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to complete registration",
-      );
-      if (error instanceof Error) {
-        setErrorCode(error.message as NotificationErrorCode);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (!userId) {
-    return null;
   }
+
+      // // Get form data
+      // const userData = {
+      //   name: formData.name,
+      //   last_name: formData.lastName,
+      //   email: formData.email,
+      //   age: Number.parseInt(formData.age),
+      //   subscription: false,
+      //   wallet_address: walletAddress,
+      //   username,
+      //   country:
+      //     COUNTRIES.find((c) => c.countryCode === formData.country)?.country ||
+      //     "Costa Rica",
+      // };
+
+  //     // Client-side validation
+  //     if (
+  //       !userData.name ||
+  //       userData.name.length < 2 ||
+  //       userData.name.length > 50
+  //     ) {
+  //       throw new Error("Name must be between 2 and 50 characters");
+  //     }
+
+  //     if (
+  //       !userData.last_name ||
+  //       userData.last_name.length < 2 ||
+  //       userData.last_name.length > 50
+  //     ) {
+  //       throw new Error("Last name must be between 2 and 50 characters");
+  //     }
+
+  //     if (
+  //       !userData.email ||
+  //       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)
+  //     ) {
+  //       throw new Error("Please enter a valid email address");
+  //     }
+
+  //     if (!userData.age || userData.age < 18 || userData.age > 120) {
+  //       throw new Error("Age must be between 18 and 120");
+  //     }
+
+  //     if (!/^0x[a-fA-F0-9]{40}$/.test(userData.wallet_address)) {
+  //       throw new Error("Invalid wallet address format");
+  //     }
+
+  //     // Create user
+  //     const response = await fetch("/api/user", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(userData),
+  //     });
+
+  //     const result = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(result.error || "Failed to create user profile");
+  //     }
+
+  //     // Create session
+  //     const sessionResponse = await fetch("/api/auth/session", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       credentials: "include",
+  //       body: JSON.stringify({
+  //         walletAddress,
+  //         isSiweVerified: true,
+  //       }),
+  //     });
+
+  //     if (!sessionResponse.ok) {
+  //       const sessionError = await sessionResponse.json();
+  //       throw new Error(sessionError.error || "Failed to create session");
+  //     }
+
+  //     // Request notification permission after successful registration
+  //     await requestPermission();
+
+  //     // Set registration completion flag and redirect to welcome page
+  //     sessionStorage.setItem("registration_complete", "true");
+  //     router.push("/welcome");
+  //   } catch (error) {
+  //     setError(
+  //       error instanceof Error
+  //         ? error.message
+  //         : "Failed to complete registration",
+  //     );
+  //     if (error instanceof Error) {
+  //       setErrorCode(error.message as NotificationErrorCode);
+  //     }
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  // if (!userId) {
+  //   return null;
+  // }
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden">
