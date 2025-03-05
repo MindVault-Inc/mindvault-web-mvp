@@ -24,6 +24,8 @@ import {
 import { useRouter } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useState } from "react";
+import { subscriptionPlanAtom, paymentAmountAtom } from "@/atoms/user";
+import { useAtom } from "jotai";
 
 interface SubscriptionData {
   next_payment_date: string | null;
@@ -42,59 +44,57 @@ interface SettingItem {
 export default function SettingsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [subscriptionPlan] = useAtom(subscriptionPlanAtom);
+  const [paymentAmount] = useAtom(paymentAmountAtom);
+  const [isLoading, setIsLoading] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     next_payment_date: null,
     isPro: false,
     subscription_start: null,
     subscription_expires: null,
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    // Mock data using the atoms instead of API calls
+    const fetchMockSettings = () => {
       try {
-        const subscriptionResponse = await fetch("/api/user/subscription", {
-          method: "GET",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-          credentials: "include",
+        // Create a current date for next payment (one month from now)
+        const currentDate = new Date();
+        const nextMonth = new Date(currentDate);
+        nextMonth.setMonth(currentDate.getMonth() + 1);
+        
+        // Determine if user is Pro based on atom
+        const isPro = subscriptionPlan === "Pro";
+        
+        // Set mock data
+        setSubscriptionData({
+          next_payment_date: isPro ? nextMonth.toISOString().split('T')[0] : null,
+          isPro: isPro,
+          subscription_start: isPro ? currentDate.toISOString().split('T')[0] : null,
+          subscription_expires: null,
         });
-
-        if (subscriptionResponse.ok) {
-          const data = await subscriptionResponse.json();
-          setSubscriptionData({
-            next_payment_date: data.next_payment_date || null,
-            isPro: data.isPro || false,
-            subscription_start: data.subscription_start || null,
-            subscription_expires: data.subscription_expires || null,
-          });
-        }
-      } catch {
-        // Error handling is done via the UI loading state
       } finally {
         setLoading(false);
       }
     };
 
+    fetchMockSettings();
+    
+    // Simulating the event listeners for focus/visibility changes
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        void fetchSettings();
+        fetchMockSettings();
       }
     };
 
-    void fetchSettings();
-
-    window.addEventListener("focus", fetchSettings);
+    window.addEventListener("focus", fetchMockSettings);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("focus", fetchSettings);
+      window.removeEventListener("focus", fetchMockSettings);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [subscriptionPlan]);
 
   const handleUpgradeClick = () => {
     router.push("/awaken-pro");
@@ -103,14 +103,10 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-
-      if (response.ok) {
+      // Mock logout - no API call
+      setTimeout(() => {
         window.location.href = "/sign-in";
-      }
+      }, 1000);
     } catch {
       // Error handling is done via the UI state
     } finally {
@@ -124,22 +120,22 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="relative mb-6 overflow-hidden rounded-b-[50px] bg-brand-tertiary pb-8 shadow-lg sm:mb-8 sm:pb-14">
+      <div className="relative mb-6 overflow-hidden rounded-b-[50px] bg-brand-tertiary pb-8 shadow-lg sm:mb-8 md:mb-10 sm:pb-14 md:pb-16 lg:pb-20">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
         <motion.div
-          className="relative z-10 mx-auto w-full max-w-2xl space-y-4 px-4 pt-16 sm:pt-20"
+          className="relative z-10 mx-auto w-full max-w-2xl space-y-4 px-4 pt-16 sm:pt-20 md:pt-24 lg:pt-28"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           <div className="space-y-3 text-center">
-            <Settings className="mx-auto h-10 w-10 text-[#E36C59]" />
-            <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
-              Settings
+            <Settings className="mx-auto h-10 w-10 text-[#E36C59] sm:h-12 sm:w-12" />
+            <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl md:text-5xl">
+              Configuración
             </h1>
           </div>
 
-          <p className="font-spaceGrotesk text-center text-lg font-normal leading-[25px] text-[#C9CDCE]">
+          <p className="font-spaceGrotesk text-center text-lg font-normal leading-[25px] text-[#C9CDCE] sm:text-xl">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -150,7 +146,7 @@ export default function SettingsPage() {
                 <Crown className="h-5 w-5 text-[#e36c59]" />
               )}
               <span className="font-medium text-white/90">
-                {subscriptionData.isPro ? "Premium Member" : "Basic Member"}
+                {subscriptionData.isPro ? "Miembro Premium" : "Miembro Básico"}
               </span>
             </motion.div>
           </p>
@@ -158,7 +154,7 @@ export default function SettingsPage() {
       </div>
 
       <motion.div
-        className="mx-auto mt-4 max-w-md px-4"
+        className="mx-auto mt-4 max-w-md px-4 sm:max-w-lg md:max-w-xl lg:max-w-2xl"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -171,10 +167,10 @@ export default function SettingsPage() {
         >
           <MembershipCard
             expiryDate={
-              subscriptionData.next_payment_date || "No active subscription"
+              subscriptionData.next_payment_date || "Sin suscripción activa"
             }
             isActive={subscriptionData.isPro}
-            cost={3.5}
+            cost={paymentAmount / 1000}
           />
 
           {!subscriptionData.isPro && (
@@ -190,16 +186,16 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center justify-center gap-2">
                   <Crown className="h-5 w-5" />
-                  <span>Upgrade to Awaken Pro</span>
+                  <span>Actualizar a Awaken Pro</span>
                 </div>
               </FilledButton>
 
               <div className="relative z-10 mt-3 mb-4 px-4 py-2 text-center">
-                <p className="text-sm font-medium">
-                  <span className="text-neutral-black">Unlock</span>
-                  <span className="text-accent-red"> advanced features </span>
-                  <span className="text-neutral-black">and</span>
-                  <span className="text-accent-red"> exclusive content </span>
+                <p className="text-sm font-medium sm:text-base">
+                  <span className="text-neutral-black">Desbloquea</span>
+                  <span className="text-accent-red"> funciones avanzadas </span>
+                  <span className="text-neutral-black">y</span>
+                  <span className="text-accent-red"> contenido exclusivo </span>
                 </p>
               </div>
             </div>
@@ -207,7 +203,7 @@ export default function SettingsPage() {
         </motion.div>
 
         <motion.div
-          className="mt-8 space-y-4"
+          className="mt-8 space-y-4 md:mt-10 md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:gap-8"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
@@ -216,16 +212,16 @@ export default function SettingsPage() {
             [
               {
                 Icon: Bell,
-                label: "Notifications",
+                label: "Notificaciones",
               },
-              { Icon: Moon, label: "Dark Theme", element: <ToggleSwitch /> },
+              { Icon: Moon, label: "Tema Oscuro", element: <ToggleSwitch /> },
               {
                 Icon: FileText,
-                label: "View Privacy Policy",
+                label: "Ver Política de Privacidad",
                 onClick: () => {},
               },
-              { Icon: HelpCircle, label: "Help Center", onClick: () => {} },
-              { Icon: Flag, label: "Report an Issue", onClick: () => {} },
+              { Icon: HelpCircle, label: "Centro de Ayuda", onClick: () => {} },
+              { Icon: Flag, label: "Reportar un Problema", onClick: () => {} },
             ] as SettingItem[]
           ).map((setting, index) => (
             <motion.div
@@ -233,6 +229,7 @@ export default function SettingsPage() {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
+              className="md:col-span-1"
             >
               <SettingsCard
                 icon={setting.Icon}
@@ -245,7 +242,7 @@ export default function SettingsPage() {
         </motion.div>
 
         <motion.div
-          className="mb-20 mt-8"
+          className="mb-20 mt-8 md:mt-10 md:flex md:justify-center lg:mt-12"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.8 }}
@@ -253,11 +250,11 @@ export default function SettingsPage() {
           <FilledButton
             variant="primary"
             size="lg"
-            className="w-full bg-[#E36C59] hover:bg-[#E36C59]/90"
+            className="w-full bg-[#E36C59] hover:bg-[#E36C59]/90 md:w-2/3 lg:w-1/2"
             onClick={handleLogout}
             disabled={isLoading}
           >
-            {isLoading ? "Signing out..." : "Sign Out"}
+            {isLoading ? "Cerrando sesión..." : "Cerrar Sesión"}
           </FilledButton>
         </motion.div>
       </motion.div>
