@@ -40,7 +40,7 @@ export function TestCard({
 					<div className="space-y-4">
 						<div className="space-y-2">
 							<div className="flex justify-between text-sm font-medium">
-								<span>Progress</span>
+								<span>Progreso</span>
 								<span className="font-bold text-[#E36C59]">{progress}%</span>
 							</div>
 							<div
@@ -77,7 +77,7 @@ export function TestCard({
 									<path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
 									<path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
 								</svg>
-								<span>Achievements</span>
+								<span>Logro</span>
 							</div>
 							<div className="flex gap-2">
 								{achievements.map((achievement) => (

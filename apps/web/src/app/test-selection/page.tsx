@@ -36,18 +36,18 @@ const testProgressAtom = atomWithStorage<TestProgress>("test-progress", {});
 const mockTests = [
   {
     testId: "1",
-    testName: "Political Ideology Test",
+    testName: "Test de Ideología Política",
     totalQuestions: 70,
     achievements: [
       {
         id: "1",
-        title: "Political Explorer",
-        description: "Complete your first ideology test"
+        title: "Explorador Político",
+        description: "Completa tu primer test político"
       },
       {
         id: "2",
-        title: "Deep Thinker",
-        description: "Answer all questions thoughtfully"
+        title: "Pensador Profundo",
+        description: "Responde todas las preguntas de manera reflexiva."
       }
     ]
   }
