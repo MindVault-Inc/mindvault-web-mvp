@@ -6,6 +6,8 @@ import { LoadingSpinner, ProgressBar } from "@/components/ui/feedback";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 const answerOptions = [
   { label: "Strongly Agree", multiplier: 1.0 },
@@ -352,111 +354,117 @@ export default function IdeologyTest() {
   }
 
   return (
-    <div className="fixed inset-0 bg-brand-tertiary overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 bg-brand-tertiary z-10 px-4 pt-4">
-          <FilledButton
-            variant="primary"
-            size="sm"
-            onClick={handleLeaveTest}
-            className="bg-[#E36C59] hover:bg-[#E36C59]/90"
-          >
-            Leave Test
-          </FilledButton>
-        </div>
-
-        <div className="absolute inset-0 pt-20 pb-[280px] overflow-y-auto">
-          <div className="w-full max-w-md mx-auto px-4">
-            <div className="space-y-6">
-              <h1 className="text-center text-white text-2xl font-bold">
-                Question {currentQuestion + 1} of {totalQuestions}
-              </h1>
-
-              <div className="flex justify-center">
-                <ProgressBar progress={progress} variant="warning" />
-              </div>
-
-              <div className="text-center text-white text-xl font-bold min-h-[4rem] pt-4">
-                {questions[currentQuestion].question}
-              </div>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#387478] to-[#2A5A5E] p-4">
+      <div className="max-w-xl w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#2C5154] rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+        >
+          {/* Question Counter */}
+          <div className="text-center mb-6">
+            <h1 className="text-white text-2xl font-semibold">
+              Question {currentQuestion + 1} of {totalQuestions}
+            </h1>
           </div>
-        </div>
 
-        {/* Answer Buttons Section - Fixed at bottom */}
-        <div className="absolute bottom-16 left-0 right-0 bg-brand-tertiary/95 backdrop-blur-sm border-t border-white/10">
-          <div className="w-full max-w-md mx-auto px-4 py-4 space-y-2.5">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 mb-3">
-                <p className="text-red-400 text-sm text-center">{error}</p>
-              </div>
-            )}
+          {/* Progress Bar */}
+          <div className="flex justify-center mb-10">
+            <ProgressBar 
+              progress={((currentQuestion + 1) / totalQuestions) * 100} 
+              variant="warning"
+            />
+          </div>
 
+          {/* Question */}
+          <div className="text-center mb-8">
+            <h2 className="text-white text-xl font-medium leading-relaxed">
+              {questions[currentQuestion].question}
+            </h2>
+          </div>
+
+          {/* Answer Options */}
+          <div className="space-y-3 mb-10">
             {answerOptions.map((answer) => {
-              const isSelected =
-                userAnswers[questions[currentQuestion].id] ===
-                answer.multiplier;
+              const isSelected = userAnswers[questions[currentQuestion].id] === answer.multiplier;
               return (
-                <FilledButton
+                <button
                   key={`${answer.label}-${answer.multiplier}`}
-                  variant="secondary"
-                  size="lg"
-                  className={`w-full ${
-                    isSelected
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-[#387478] hover:bg-[#387478]/90"
-                  } rounded-[30px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] text-white text-base font-bold`}
                   onClick={() => handleAnswer(answer.multiplier)}
+                  className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 ${
+                    isSelected
+                      ? "bg-[#387478] border-l-4 border-[#E36C59]"
+                      : "bg-[#387478]/70 hover:bg-[#387478] border-l-4 border-transparent"
+                  }`}
                 >
-                  {answer.label}
-                </FilledButton>
+                  <div className="flex items-center">
+                    <div
+                      className={`w-4 h-4 rounded-full mr-3 ${
+                        isSelected ? "bg-[#E36C59]" : "border border-white"
+                      }`}
+                    >
+                      {isSelected && <div className="h-full w-full rounded-full"></div>}
+                    </div>
+                    <span>{answer.label}</span>
+                  </div>
+                </button>
               );
             })}
-
-            <div className="flex justify-between pt-2">
-              <div>
-                {currentQuestion > 0 && (
-                  <FilledButton
-                    variant="primary"
-                    size="sm"
-                    onClick={handlePrevious}
-                    disabled={currentQuestion === 0}
-                    className={cn(
-                      "bg-[#E36C59] hover:bg-[#E36C59]/90",
-                      currentQuestion === 0 && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    Previous
-                  </FilledButton>
-                )}
-              </div>
-
-              {currentQuestion === totalQuestions - 1 ? (
-                <FilledButton
-                  variant="primary"
-                  size="sm"
-                  onClick={handleEndTest}
-                  disabled={isSubmitting}
-                  className={cn(
-                    "bg-green-600 hover:bg-green-700",
-                    isSubmitting && "opacity-50 cursor-not-allowed",
-                  )}
-                >
-                  {isSubmitting ? "Saving..." : "End Test"}
-                </FilledButton>
-              ) : (
-                <FilledButton
-                  variant="primary"
-                  size="sm"
-                  onClick={handleNext}
-                  className="bg-[#E36C59] hover:bg-[#E36C59]/90"
-                >
-                  Next
-                </FilledButton>
-              )}
-            </div>
           </div>
-        </div>
+
+          {/* Navigation */}
+          <div className="flex justify-between">
+            {currentQuestion > 0 && (
+              <button
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className={`px-6 py-2 rounded-full transition-colors ${
+                  currentQuestion === 0
+                    ? "bg-[#1E3B3E] text-[#5A7A7D] cursor-not-allowed"
+                    : "bg-[#E36C59] text-white hover:bg-[#D05A48]"
+                }`}
+              >
+                <div className="flex items-center">
+                  <ChevronLeft className="w-5 h-5 mr-1" />
+                  Previous
+                </div>
+              </button>
+            )}
+
+            {currentQuestion === totalQuestions - 1 ? (
+              <button
+                onClick={handleEndTest}
+                disabled={isSubmitting}
+                className={`px-6 py-2 rounded-full transition-colors ${
+                  isSubmitting
+                    ? "bg-[#1E3B3E] text-[#5A7A7D] cursor-not-allowed"
+                    : "bg-[#E36C59] text-white hover:bg-[#D05A48]"
+                }`}
+              >
+                <div className="flex items-center">
+                  {isSubmitting ? "Saving..." : "End Test"}
+                  <ChevronRight className="w-5 h-5 ml-1" />
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                className="px-6 py-2 rounded-full transition-colors bg-[#E36C59] text-white hover:bg-[#D05A48]"
+              >
+                <div className="flex items-center">
+                  Next
+                  <ChevronRight className="w-5 h-5 ml-1" />
+                </div>
+              </button>
+            )}
+          </div>
+
+          {error && (
+            <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
