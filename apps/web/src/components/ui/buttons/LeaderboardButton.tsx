@@ -9,14 +9,13 @@ export function LeaderboardButton() {
 		<button
 			type="button"
 			onClick={() => router.push("/leaderboard")}
-			className="flex w-full max-w-[365px] transform items-center justify-between rounded-2xl bg-brand-tertiary p-6 text-white transition-all duration-300 hover:scale-105 hover:bg-brand-tertiary/90"
+			className="flex w-[96vw] max-w-[360px] sm:max-w-[440px] md:max-w-[520px] transform items-center justify-between rounded-[20px] bg-brand-tertiary p-3 sm:p-4 md:p-5 text-white transition-all duration-300 hover:scale-105 hover:bg-brand-tertiary/90 mx-auto"
 		>
-			<div className="flex items-center gap-4">
-				<div className="rounded-xl bg-brand-secondary p-3">
+			<div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+				<div className="rounded-xl bg-brand-secondary p-2 sm:p-2.5 md:p-3">
 					<svg
-						width="24"
-						height="24"
 						viewBox="0 0 24 24"
+						className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
 						fill="none"
 						xmlns="http://www.w3.org/2000/svg"
 						aria-hidden="true"
@@ -51,16 +50,15 @@ export function LeaderboardButton() {
 						/>
 					</svg>
 				</div>
-				<div className="flex flex-col">
-					<span className="text-lg font-bold">See Leaderboard</span>
-					<span className="text-sm text-slate-200">
-						Check where you rank among others
+				<div className="flex flex-col gap-1 sm:gap-1.5">
+					<span className="text-lg sm:text-xl md:text-2xl font-bold">Ver Clasificación</span>
+					<span className="text-base sm:text-lg md:text-xl text-slate-200">
+						Compara tu posición con otros
 					</span>
 				</div>
 			</div>
 			<svg
-				width="24"
-				height="24"
+				className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
 				viewBox="0 0 24 24"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
