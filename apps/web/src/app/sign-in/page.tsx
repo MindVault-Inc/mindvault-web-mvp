@@ -48,6 +48,11 @@ export default function SignIn() {
     return () => clearInterval(wordInterval);
   }, []);
 
+  const handleSignIn = () => {
+    setIsConnecting(true);
+    router.push("/register")
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -128,7 +133,7 @@ export default function SignIn() {
           variant="primary"
           size="lg"
           className="w-full bg-[#E36C59] hover:bg-[#E36C59]/90"
-          onClick={handleWorldIDClick}
+          onClick={handleSignIn}
           disabled={isConnecting}
         >
           <div className="flex items-center justify-center gap-2">

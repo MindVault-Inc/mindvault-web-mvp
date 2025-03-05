@@ -6,6 +6,7 @@ import { Space_Grotesk } from "next/font/google";
 import type * as React from "react";
 
 import { LayoutContent } from "@/components/layout/LayoutContent";
+import { ThemeProvider } from "@/providers";
 
 
 const spaceGrotesk = Space_Grotesk({

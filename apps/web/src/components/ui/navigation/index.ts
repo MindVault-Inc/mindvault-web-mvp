@@ -1,1 +1,1 @@
-export * from './BannerTop'; 
+export * from './SearchBar';

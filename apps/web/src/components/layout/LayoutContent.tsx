@@ -2,9 +2,7 @@
 
 import { BottomNav } from "@/components/common";
 import { BackgroundEffect } from "@/components/ui/BackgroundEffect";
-import { BannerTop } from "@/components/ui/navigation/BannerTop";
 import { LoadingOverlay } from "@/components/ui/feedback/LoadingOverlay";
-import { useAuth, useVerification } from "@/hooks";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -16,15 +14,6 @@ interface LayoutContentProps {
 }
 
 export function LayoutContent({ children }: LayoutContentProps) {
-  const {
-    isAuthenticated,
-    isRegistered,
-    loading: authLoading,
-    refreshAuth,
-  } = useAuth();
-
-  const { isVerified, refreshVerification, hasCheckedInitial } =
-    useVerification();
   const pathname = usePathname();
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -49,20 +38,7 @@ export function LayoutContent({ children }: LayoutContentProps) {
     const { isSignInPage, isRegisterPage, isWelcomePage } = pageStates;
 
     if (isSignInPage || isRegisterPage || isWelcomePage) return;
-
-    if (!authLoading) {
-      if (isAuthenticated && isRegistered) {
-        refreshVerification();
-      } else if (!isAuthenticated) {
-        refreshAuth();
-      }
-    }
   }, [
-    isAuthenticated,
-    isRegistered,
-    authLoading,
-    refreshVerification,
-    refreshAuth,
     pageStates,
   ]);
 
@@ -98,24 +74,20 @@ export function LayoutContent({ children }: LayoutContentProps) {
     isIdeologyTest,
   } = pageStates;
 
-  const showLoadingOverlay = !isSignInPage && !isRegisterPage && !isWelcomePage;
+  // const showLoadingOverlay = !isSignInPage && !isRegisterPage && !isWelcomePage;
 
-  if (
-    (authLoading || (isAuthenticated && isRegistered && !hasCheckedInitial)) &&
-    showLoadingOverlay
-  ) {
-    return (
-      <>
-        <LoadingOverlay />
-        <div className="flex-grow opacity-0">{children}</div>
-      </>
-    );
-  }
+  // if (
+  //   showLoadingOverlay
+  // ) {
+  //   return (
+  //     <>
+  //       <LoadingOverlay />
+  //       <div className="flex-grow opacity-0">{children}</div>
+  //     </>
+  //   );
+  // }
 
   const showBanner =
-    isAuthenticated &&
-    isRegistered &&
-    !isVerified &&
     !isSignInPage &&
     !isRegisterPage &&
     !isWelcomePage &&
@@ -123,8 +95,6 @@ export function LayoutContent({ children }: LayoutContentProps) {
     !isIdeologyTest;
 
   const showNav =
-    isAuthenticated &&
-    isRegistered &&
     !isSignInPage &&
     !isRegisterPage &&
     !isWelcomePage &&
@@ -133,7 +103,6 @@ export function LayoutContent({ children }: LayoutContentProps) {
   return (
     <div className="flex min-h-screen flex-col bg-neutral-bg">
       <BackgroundEffect variant={getBackgroundVariant()} />
-      {showBanner && <BannerTop />}
       <main className="scroll-container">
         <div className={`flex-grow ${showNav ? "pb-16" : ""}`}>{children}</div>
       </main>

@@ -7,7 +7,6 @@ export * from './navigation';
 // Overlay components
 export * from './overlays/dialog';
 export * from './overlays/sheet';
-export * from './overlays/VerifyModal';
 
 // Button components
 export { FilledButton, OutlinedButton, AchievementButton, LeaderboardButton, WorldIDButton } from './buttons';
@@ -20,7 +19,6 @@ export * from './feedback';
 
 // Other components
 export * from './tooltip';
-export * from './NotificationsToggle';
 export * from './ToggleSwitch';
 export * from './BackgroundEffect';
 export * from './InsightResultTag'; 

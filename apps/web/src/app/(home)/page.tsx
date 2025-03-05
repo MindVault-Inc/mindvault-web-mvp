@@ -27,7 +27,7 @@ interface User {
 
 export default function Home() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
   const [userName] = useAtom(userNameAtom);
 
@@ -37,7 +37,7 @@ export default function Home() {
         // Use the userName from the atom
         if (userName) {
           setUserData({
-            name: userName,
+            name: userName || "User",
             last_name: "",
             level: "1",
             level_points: 0,
@@ -56,15 +56,15 @@ export default function Home() {
     void fetchData();
   }, [router, userName]);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  // if (loading) {
+  //   return <LoadingSpinner />;
+  // }
 
   return (
     <>
       <div className="min-h-screen">
         <div className="relative mb-8 overflow-hidden rounded-b-[4rem] border-b border-brand-tertiary/20 bg-brand-tertiary p-10 pb-12 pt-16 shadow-lg">
-          <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
 
           <motion.div
             className="relative z-10 mx-auto max-w-md space-y-4 text-center"
