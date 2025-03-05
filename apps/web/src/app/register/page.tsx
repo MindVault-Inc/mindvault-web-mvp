@@ -1,55 +1,48 @@
 "use client";
 
 import { FilledButton } from "@/components/ui/buttons/FilledButton";
-import { NotificationDialog } from "@/components/ui/feedback/NotificationError";
 import { Input } from "@/components/ui/base/input";
 import { COUNTRIES, type CountryCode } from "@/constants/countries";
 import { useRouter, useSearchParams } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useState } from "react";
-
-type NotificationErrorCode =
-  | "user_rejected"
-  | "generic_error"
-  | "already_requested"
-  | "permission_disabled"
-  | "already_granted"
-  | "unsupported_permission";
+import { useAtom } from "jotai";
+import { userNameAtom } from "@/atoms/user";
 
 export default function Register() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const userId = searchParams.get("userId");
-
+  
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
     email: "",
     age: "",
     country: "CR" as CountryCode,
-    wallet_address: "",
   });
 
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorCode, setErrorCode] = useState<NotificationErrorCode | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    if (!userId) {
-      router.push("/sign-in");
-      return;
-    }
-
-    // Set the wallet address from URL parameter
-    setFormData((prev) => ({
-      ...prev,
-      wallet_address: userId,
-    }));
-  }, [userId, router]);
+  const [, setUserName] = useAtom(userNameAtom);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // Store just the name in the atom
+      setUserName(formData.name);
+      
+      // Redirect to welcome page
+      router.push("/welcome");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to complete registration"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
       // // Get form data
@@ -155,13 +148,6 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden">
-      {/* Render NotificationError if errorCode is set */}
-      {errorCode && (
-        <NotificationDialog
-          errorCode={errorCode}
-          onProceed={() => setErrorCode(undefined)}
-        />
-      )}
       <div className="relative w-screen h-[354px] -mt-4">
         <div className="w-screen absolute top-0 bg-white rounded-b-[65px] shadow-[inset_-5px_-5px_25px_0px_rgba(134,152,183,1.00),inset_5px_5px_25px_0px_rgba(248,248,246,1.00)]" />
         <div className="w-screen h-full px-[34px] pt-[104px] pb-[70px] absolute top-0 bg-[#2c5154] rounded-b-[65px] shadow-[21px_38px_64.69999694824219px_3px_rgba(0,0,0,0.25)] overflow-hidden">

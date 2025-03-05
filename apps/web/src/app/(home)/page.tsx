@@ -6,14 +6,14 @@ import {
   LoadingSpinner,
   ProfileCard,
   QuizCard,
-  VerifyModal
 } from "@/components";
-import { useVerification } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { userNameAtom } from "@/atoms/user";
 
 interface User {
   name: string;
@@ -25,95 +25,46 @@ interface User {
   verified?: boolean;
 }
 
-// Function to clear verification session
-const clearVerificationSession = () => {
-  sessionStorage.removeItem("verify-modal-shown");
-};
-
 export default function Home() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
-  const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const { handleVerify } = useVerification();
+  const [userName] = useAtom(userNameAtom);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Skip auth check if we're in the registration process
-        if (window.location.pathname.includes("/register")) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch("/api/home");
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("API Error:", errorData);
-
-          // If user not found, clear session and redirect to sign-in
-          if (response.status === 404) {
-            // Handle user not found case silently
-            clearVerificationSession();
-            const logoutResponse = await fetch("/api/auth/logout", {
-              method: "POST",
-            });
-            if (logoutResponse.ok) {
-              router.push("/sign-in");
-            }
-            return;
-          }
-          return;
-        }
-        const data = await response.json();
-        setUserData(data.user);
-
-        // Check if user is verified
-        if (
-          !data.user.verified &&
-          !sessionStorage.getItem("verify-modal-shown")
-        ) {
-          setShowVerifyModal(true);
-          sessionStorage.setItem("verify-modal-shown", "true");
+        // Use the userName from the atom
+        if (userName) {
+          setUserData({
+            name: userName || "User",
+            last_name: "",
+            level: "1",
+            level_points: 0,
+            points: 0,
+            maxPoints: 100,
+            verified: false
+          });
         }
       } catch (error) {
-        console.error("Error fetching home data:", error);
+        console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     void fetchData();
-  }, [router]);
+  }, [router, userName]);
 
-  const handleVerifyClick = async () => {
-    const success = await handleVerify();
-    if (success) {
-      setShowVerifyModal(false);
-      // Refresh user data to get updated verification status
-      const response = await fetch("/api/home");
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data.user);
-      }
-    }
-  };
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  // if (loading) {
+  //   return <LoadingSpinner />;
+  // }
 
   return (
     <>
-      <VerifyModal
-        isOpen={showVerifyModal}
-        onClose={() => setShowVerifyModal(false)}
-        onVerify={handleVerifyClick}
-      />
-
       <div className="min-h-screen">
         <div className="relative mb-8 overflow-hidden rounded-b-[4rem] border-b border-brand-tertiary/20 bg-brand-tertiary p-10 pb-12 pt-16 shadow-lg">
-          <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
 
           <motion.div
             className="relative z-10 mx-auto max-w-md space-y-4 text-center"

@@ -2,12 +2,6 @@
 
 import { FilledButton } from "@/components/ui/buttons/FilledButton";
 import { cn } from "@/lib/utils";
-import {
-  MiniKit,
-  type PayCommandInput,
-  type Tokens,
-  tokenToDecimals,
-} from "@worldcoin/minikit-js";
 import { motion } from "framer-motion";
 import { CheckCircle2, Crown, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,27 +15,9 @@ export default function AwakenProPage() {
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
-      try {
-        const response = await fetch("/api/user/subscription");
-        if (response.ok) {
-          const data = await response.json();
-          setCurrentPlan(data.isPro ? "Pro" : "Basic");
-        }
-      } catch (error) {
-        console.error("Error fetching subscription status:", error);
-      }
     };
 
     const fetchPayAmount = async () => {
-      try {
-        const response = await fetch("/api/fetch-pay-amount");
-        if (response.ok) {
-          const data = await response.json();
-          setPayAmount(data.amount);
-        }
-      } catch (error) {
-        console.error("Error fetching pay amount:", error);
-      }
     };
 
     fetchSubscriptionStatus();
@@ -50,58 +26,6 @@ export default function AwakenProPage() {
 
   const handleUpgrade = async () => {
     setIsProcessing(true);
-    try {
-      if (!MiniKit.isInstalled()) {
-        window.open("https://worldcoin.org/download-app", "_blank");
-        return;
-      }
-
-      // Initiate payment
-      const res = await fetch("/api/initiate-payment", {
-        method: "POST",
-      });
-      const { id } = await res.json();
-
-      // Configure payment
-      const payload: PayCommandInput = {
-        reference: id,
-        to: process.env.NEXT_PUBLIC_PAYMENT_ADDRESS ?? "",
-        tokens: [
-          {
-            symbol: "WLD" as Tokens,
-            token_amount: tokenToDecimals(
-              payAmount,
-              "WLD" as Tokens,
-            ).toString(),
-          },
-        ],
-        description: "Upgrade to Awaken Pro - 1 Month Subscription",
-      };
-
-      const { finalPayload } = await MiniKit.commandsAsync.pay(payload);
-
-      if (finalPayload.status === "success") {
-        // Verify payment
-        const confirmRes = await fetch("/api/confirm-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ payload: finalPayload }),
-        });
-
-        const payment = await confirmRes.json();
-        if (payment.success) {
-          // Force refresh subscription data on settings page
-          router.refresh();
-          router.push("/settings?upgrade=success");
-        } else {
-          console.error("Payment confirmation failed:", payment.error);
-        }
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   return (

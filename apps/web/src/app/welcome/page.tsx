@@ -5,36 +5,22 @@ import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
+import { useAtom } from 'jotai';
+import { userNameAtom } from '@/atoms/user';
 import { FilledButton } from "@/components/ui/buttons/FilledButton";
-import { useAuth } from "@/hooks";
 
 export default function Welcome() {
   const router = useRouter();
-  const { isAuthenticated, isRegistered } = useAuth();
-  const [firstName, setFirstName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [userName] = useAtom(userNameAtom);
+  const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
     async function fetchUserData() {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/user/me", {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          const extractedName = userData.name?.split(" ")[0] || "User";
-          setFirstName(extractedName);
-        } else {
-          setFirstName("User");
-        }
+        // Get first name from the atom
+        setFirstName(userName);
       } catch {
         setFirstName("User");
       } finally {
@@ -42,30 +28,14 @@ export default function Welcome() {
       }
     }
 
-    // Only fetch if we're authenticated and registered
-    if (isAuthenticated && isRegistered) {
-      void fetchUserData();
-    } else if (!isAuthenticated) {
-      // If not authenticated, redirect to sign-in
-      router.replace("/sign-in");
-    }
-  }, [isAuthenticated, isRegistered, router]);
+    void fetchUserData();
+  }, [userName]);
 
-  const handleGetStarted = async () => {
+  const handleGetStarted = () => {
     try {
-      const sessionResponse = await fetch("/api/auth/session", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!sessionResponse.ok) {
-        throw new Error("Session verification failed");
-      }
-
+      // Remove registration completion flag
       sessionStorage.removeItem("registration_complete");
+      // Navigate to home page
       router.replace("/");
     } catch (error) {
       console.error("Error during navigation:", error);
@@ -77,10 +47,10 @@ export default function Welcome() {
   useEffect(() => {
     const registrationComplete = sessionStorage.getItem("registration_complete");
 
-    if (!registrationComplete && !isAuthenticated) {
+    if (!registrationComplete) {
       router.replace("/sign-in");
     }
-  }, [isAuthenticated, router]);
+  }, [router]);
 
   if (isLoading) {
     return (

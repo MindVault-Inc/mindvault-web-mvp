@@ -1,5 +1,6 @@
 "use client";
 
+import { Insight } from "@/atoms/insights";
 import { Canvas as ResultsCanvas } from "@/components/features";
 import { FilledButton } from "@/components/ui/buttons/FilledButton";
 import { InsightResultCard } from "@/components/ui/cards/InsightResultCard";
@@ -10,19 +11,6 @@ import { BookOpen } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 
-interface Insight {
-  category: string;
-  percentage: number;
-  insight: string;
-  description: string;
-  left_label: string;
-  right_label: string;
-  values: {
-    left: number;
-    right: number;
-    label: string;
-  };
-}
 
 export default function InsightsPage() {
   const router = useRouter();
