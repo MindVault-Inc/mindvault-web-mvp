@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 
 interface Achievement {
   id: string;
@@ -22,6 +24,35 @@ interface TestData {
   achievements: Achievement[];
 }
 
+// Import the test progress atom from ideology-test
+interface TestProgress {
+  [questionId: number]: number; // questionId -> multiplier
+}
+
+const testProgressAtom = atomWithStorage<TestProgress>("test-progress", {});
+
+// Mock test data
+// TODO: Change test name to spanish
+const mockTests = [
+  {
+    testId: "1",
+    testName: "Political Ideology Test",
+    totalQuestions: 70,
+    achievements: [
+      {
+        id: "1",
+        title: "Political Explorer",
+        description: "Complete your first ideology test"
+      },
+      {
+        id: "2",
+        title: "Deep Thinker",
+        description: "Answer all questions thoughtfully"
+      }
+    ]
+  }
+];
+
 export default function TestsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -32,45 +63,37 @@ export default function TestsPage() {
     answeredQuestions: 0,
     achievements: [],
   });
+  
+  // Get test progress from atom
+  const [testProgress] = useAtom(testProgressAtom);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadMockData = () => {
       try {
-        // Fetch test data
-        const response = await fetch("/api/tests");
-        const data = await response.json();
-
-        if (data.tests && data.tests.length > 0) {
-          const firstTest = data.tests[0];
-
-          // Fetch progress for this test
-          const progressResponse = await fetch(
-            `/api/tests/${firstTest.testId}/progress`,
-          );
-          const progressData = await progressResponse.json();
-
-          const answeredCount = progressData.answers
-            ? Object.keys(progressData.answers).length
-            : 0;
+        if (mockTests && mockTests.length > 0) {
+          const firstTest = mockTests[0];
+          
+          // Calculate answered questions from the atom
+          const answeredCount = Object.keys(testProgress).length;
 
           setTestData({
             testId: firstTest.testId,
             title: firstTest.testName,
-            totalQuestions: firstTest.totalQuestions || 0,
+            totalQuestions: firstTest.totalQuestions || 70, // Default to 70 as specified
             answeredQuestions: answeredCount,
             achievements: firstTest.achievements || [],
           });
-        } else {
         }
       } catch (error) {
-        console.error("Error fetching test data:", error);
+        console.error("Error loading mock test data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    void fetchData();
-  }, []);
+    // Simulate loading delay
+    loadMockData();
+  }, [testProgress]);
 
   const handleSearch = (query: string) => {
     if (query.toLowerCase().includes(testData.title.toLowerCase())) {

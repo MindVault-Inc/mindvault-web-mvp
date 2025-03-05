@@ -12,6 +12,44 @@ interface Achievement {
   obtained: boolean;
 }
 
+// Mock achievement data
+const mockAchievements: Achievement[] = [
+  {
+    title: "Political Novice",
+    description: "Complete your first ideology test",
+    date: "2024-01-15",
+    obtained: true
+  },
+  {
+    title: "Deep Thinker",
+    description: "Answer all questions thoughtfully in under 10 minutes",
+    date: "2024-01-20",
+    obtained: true
+  },
+  {
+    title: "Consistent Voice",
+    description: "Complete 3 ideology tests with similar results",
+    obtained: false
+  },
+  {
+    title: "Political Scholar",
+    description: "Read 10 detailed analyses of your results",
+    obtained: false
+  },
+  {
+    title: "Community Voice",
+    description: "Share your results with the community",
+    obtained: false
+  }
+];
+
+// Mock level data
+const mockLevel = {
+  current: 25,
+  max: 100,
+  title: "Political Explorer"
+};
+
 export default function AchievementsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -20,20 +58,19 @@ export default function AchievementsPage() {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadMockData = () => {
       try {
-        const response = await fetch("/api/achievements");
-        const data = await response.json();
-        setLevel(data.level);
-        setAchievements(data.achievements);
+        setLevel(mockLevel);
+        setAchievements(mockAchievements);
       } catch (error) {
-        console.error("Error fetching achievements:", error);
+        console.error("Error loading mock achievements:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    void fetchData();
+    // Simulate loading delay
+    loadMockData();
   }, []);
 
   const handleCloseModal = () => {

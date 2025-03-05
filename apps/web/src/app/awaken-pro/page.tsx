@@ -6,26 +6,21 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Crown, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { subscriptionPlanAtom, paymentAmountAtom } from "@/atoms/user";
 
 export default function AwakenProPage() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<"Basic" | "Pro">("Basic");
-  const [payAmount, setPayAmount] = useState(0);
-
-  useEffect(() => {
-    const fetchSubscriptionStatus = async () => {
-    };
-
-    const fetchPayAmount = async () => {
-    };
-
-    fetchSubscriptionStatus();
-    fetchPayAmount();
-  }, []);
+  const [currentPlan, setCurrentPlan] = useAtom(subscriptionPlanAtom);
+  const [payAmount] = useAtom(paymentAmountAtom);
 
   const handleUpgrade = async () => {
     setIsProcessing(true);
+    
+    // Simulate processing delay
+    setCurrentPlan("Pro");
+    setIsProcessing(false);
   };
 
   return (
@@ -72,7 +67,7 @@ export default function AwakenProPage() {
 
           <div className="mb-8">
             <div className="text-4xl font-bold text-white mb-2">
-              {payAmount} WLD
+              {payAmount} CRC
             </div>
             <div className="text-slate-300 text-sm">
               Per month, billed monthly

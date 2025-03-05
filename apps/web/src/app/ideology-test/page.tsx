@@ -8,6 +8,85 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { atom, useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+
+// Mock data @AlvaroLazarus change this
+const mockQuestions: Question[] = [
+  {
+    id: 1,
+    question: "Economic freedom is more important than economic equality.",
+    effect: { econ: 10, dipl: 0, govt: 0, scty: 0 }
+  },
+  {
+    id: 2,
+    question: "Government intervention in the economy is necessary to protect citizens.",
+    effect: { econ: -10, dipl: 0, govt: 0, scty: 0 }
+  },
+  {
+    id: 3,
+    question: "International cooperation is more beneficial than national self-interest.",
+    effect: { econ: 0, dipl: 10, govt: 0, scty: 0 }
+  },
+  {
+    id: 4,
+    question: "Military action is sometimes necessary to protect national interests.",
+    effect: { econ: 0, dipl: -10, govt: 0, scty: 0 }
+  },
+  {
+    id: 5,
+    question: "Civil liberties are more important than security concerns.",
+    effect: { econ: 0, dipl: 0, govt: 10, scty: 0 }
+  },
+  {
+    id: 6,
+    question: "Strong government authority is needed to maintain social order.",
+    effect: { econ: 0, dipl: 0, govt: -10, scty: 0 }
+  },
+  {
+    id: 7,
+    question: "Traditional values should guide social progress.",
+    effect: { econ: 0, dipl: 0, govt: 0, scty: -10 }
+  },
+  {
+    id: 8,
+    question: "Society should embrace social change and progressive values.",
+    effect: { econ: 0, dipl: 0, govt: 0, scty: 10 }
+  }
+];
+
+// Define types for our atoms
+interface TestProgress {
+  [questionId: number]: number; // questionId -> multiplier
+}
+
+interface Scores {
+  econ: number;
+  dipl: number;
+  govt: number;
+  scty: number;
+}
+
+interface Insight {
+  category: string;
+  percentage: number;
+  insight: string;
+  description: string;
+  left_label: string;
+  right_label: string;
+  values: {
+    left: number;
+    right: number;
+    label: string;
+  };
+}
+
+// Create atoms with localStorage persistence
+const testProgressAtom = atomWithStorage<TestProgress>("test-progress", {});
+const scoresAtom = atomWithStorage<Scores>("test-scores", { econ: 0, dipl: 0, govt: 0, scty: 0 });
+const insightsAtom = atomWithStorage<Record<string, Insight[]>>("test-insights", {});
+const ideologyAtom = atomWithStorage<string>("test-ideology", "");
+const testCompletedAtom = atomWithStorage<boolean>("test-completed", false);
 
 const answerOptions = [
   { label: "Strongly Agree", multiplier: 1.0 },
@@ -17,20 +96,102 @@ const answerOptions = [
   { label: "Strongly Disagree", multiplier: -1.0 },
 ];
 
+// Mock ideologies based on scores
+// @AlvaroLazarus change this TO ACTUAL IDEOLOGIES OF 8VALUES
+const getIdeology = (scores: Scores): string => {
+  const { econ, dipl, govt, scty } = scores;
+  
+  if (econ > 60 && govt > 60) return "Libertarian";
+  if (econ < 40 && govt < 40) return "Authoritarian Left";
+  if (econ > 60 && govt < 40) return "Authoritarian Right";
+  if (econ < 40 && govt > 60) return "Libertarian Left";
+  if (econ > 60) return "Right-Wing";
+  if (econ < 40) return "Left-Wing";
+  if (govt > 60) return "Libertarian Centrist";
+  if (govt < 40) return "Authoritarian Centrist";
+  if (scty > 60) return "Progressive Centrist";
+  if (scty < 40) return "Traditional Centrist";
+  
+  return "Centrist";
+};
+
+// Generate mock insights based on scores
+// @AlvaroLazarus change this TO THE PROPER INSIGHTS OF 8VALUES
+const generateInsights = (scores: Scores): Record<string, Insight[]> => {
+  const categories = ["econ", "dipl", "govt", "scty"];
+  const insights: Record<string, Insight[]> = {};
+  
+  categories.forEach(category => {
+    const score = scores[category as keyof Scores];
+    const insight: Insight = {
+      category,
+      percentage: score,
+      insight: `Your ${category.toUpperCase()} score is ${score}%`,
+      description: `This indicates your position on the ${getCategoryName(category)} spectrum.`,
+      left_label: getLeftLabel(category),
+      right_label: getRightLabel(category),
+      values: {
+        left: 100 - score,
+        right: score,
+        label: getCategoryName(category)
+      }
+    };
+    insights[category] = [insight];
+  });
+  
+  return insights;
+};
+
+// Helper functions for insight generation
+const getCategoryName = (category: string): string => {
+  switch (category) {
+    case "econ": return "Economic";
+    case "dipl": return "Diplomatic";
+    case "govt": return "Government";
+    case "scty": return "Societal";
+    default: return category;
+  }
+};
+
+const getLeftLabel = (category: string): string => {
+  switch (category) {
+    case "econ": return "Equality";
+    case "dipl": return "Nation";
+    case "govt": return "Authority";
+    case "scty": return "Tradition";
+    default: return "Left";
+  }
+};
+
+const getRightLabel = (category: string): string => {
+  switch (category) {
+    case "econ": return "Markets";
+    case "dipl": return "Globe";
+    case "govt": return "Liberty";
+    case "scty": return "Progress";
+    default: return "Right";
+  }
+};
+
 export default function IdeologyTest() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const testId = searchParams.get("testId") || "1";
 
+  // Local state
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [scores, setScores] = useState({ econ: 0, dipl: 0, govt: 0, scty: 0 });
-  const [userAnswers, setUserAnswers] = useState<Record<string, number>>({});
+  const [questions] = useState<Question[]>(mockQuestions);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [originalAnswers, setOriginalAnswers] = useState<Record<string, number>>({});
   const [hasUnsavedChanges] = useState(false);
+
+  // Jotai atoms
+  const [testProgress, setTestProgress] = useAtom(testProgressAtom);
+  const [scores, setScores] = useAtom(scoresAtom);
+  const [, setInsights] = useAtom(insightsAtom);
+  const [, setIdeology] = useAtom(ideologyAtom);
+  const [testCompleted, setTestCompleted] = useAtom(testCompletedAtom);
 
   const totalQuestions = questions.length;
   const progress = ((currentQuestion + 1) / totalQuestions) * 100;
@@ -46,33 +207,23 @@ export default function IdeologyTest() {
     }
   }, [error]);
 
+  // Load saved progress on initial render
   useEffect(() => {
-    const loadProgress = async (loadedQuestions: Question[]) => {
+    const loadProgress = () => {
       try {
-        const response = await fetch(`/api/tests/${testId}/progress`);
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Check if test is already completed
-          if (data.status === "completed") {
-            router.push(`/insights?testId=${testId}`);
-            return;
-          }
-          
-          if (data.answers && Object.keys(data.answers).length > 0) {
-            const lastAnsweredId = Object.keys(data.answers).pop();
-            const lastAnsweredIndex = loadedQuestions.findIndex(
-              (q) => q.id.toString() === lastAnsweredId,
-            );
-            const nextQuestionIndex = Math.min(
-              lastAnsweredIndex + 1,
-              loadedQuestions.length - 1,
-            );
-            setCurrentQuestion(nextQuestionIndex);
-            setScores(data.scores || { econ: 0, dipl: 0, govt: 0, scty: 0 });
-            setUserAnswers(data.answers);
-            setOriginalAnswers(data.answers);
-          }
+        // Check if test is already completed
+        if (testCompleted) {
+          router.push(`/insights?testId=${testId}`);
+          return;
+        }
+        
+        // Find the last answered question
+        if (Object.keys(testProgress).length > 0) {
+          const questionIds = Object.keys(testProgress).map(Number);
+          const lastAnsweredId = Math.max(...questionIds);
+          const lastAnsweredIndex = questions.findIndex(q => q.id === lastAnsweredId);
+          const nextQuestionIndex = Math.min(lastAnsweredIndex + 1, questions.length - 1);
+          setCurrentQuestion(nextQuestionIndex);
         }
       } catch (error) {
         console.error("Error loading progress:", error);
@@ -81,23 +232,11 @@ export default function IdeologyTest() {
       }
     };
 
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch(`/api/tests/${testId}/questions`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
-        }
-        const data = await response.json();
-        setQuestions(data.questions);
-        await loadProgress(data.questions);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setLoading(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [testId]);
+    // Simulate API loading delay
+    setTimeout(() => {
+      loadProgress();
+    }, 500);
+  }, [testId, testProgress, questions, router, testCompleted]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -125,11 +264,11 @@ export default function IdeologyTest() {
   const handleEndTest = async () => {
     if (isSubmitting) return;
 
-    const unansweredQuestions = Object.keys(userAnswers).length;
-    if (unansweredQuestions < questions.length) {
+    const answeredQuestions = Object.keys(testProgress).length;
+    if (answeredQuestions < questions.length) {
       setError(
         `Please answer all questions before submitting. You have ${
-          questions.length - unansweredQuestions
+          questions.length - answeredQuestions
         } questions remaining.`,
       );
       return;
@@ -138,7 +277,7 @@ export default function IdeologyTest() {
     setIsSubmitting(true);
 
     try {
-      // Calculate scores first as we'll need them in both cases
+      // Calculate scores
       const maxEcon = questions.reduce(
         (sum, q) => sum + Math.abs(q.effect.econ),
         0,
@@ -168,69 +307,24 @@ export default function IdeologyTest() {
         scty: Math.round(sctyScore),
       };
 
-      // Check if insights exist
-      const insightsResponse = await fetch(`/api/insights/${testId}`);
-      const hasExistingInsights = insightsResponse.ok && 
-        (await insightsResponse.json()).insights?.length > 0;
-
-      // Check if answers have changed
-      const hasAnswersChanged = Object.keys(originalAnswers).some(
-        key => originalAnswers[key] !== userAnswers[key]
-      );
-
-      // Save progress and update scores
-      const response = await fetch(`/api/tests/${testId}/progress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          questionId: questions[currentQuestion].id,
-          currentQuestion: questions[currentQuestion].id,
-          scores: roundedScores,
-          isComplete: true,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save final answers");
-      }
-
-      // Handle the three scenarios:
-      // 1. If insights exist and no changes - just redirect
-      if (hasExistingInsights && !hasAnswersChanged) {
+      // Update scores atom
+      setScores(roundedScores);
+      
+      // Generate insights based on scores
+      const generatedInsights = generateInsights(roundedScores);
+      setInsights(generatedInsights);
+      
+      // Calculate ideology based on scores
+      const calculatedIdeology = getIdeology(roundedScores);
+      setIdeology(calculatedIdeology);
+      
+      // Mark test as completed
+      setTestCompleted(true);
+      
+      // Simulate API delay
+      setTimeout(() => {
         router.push(`/insights?testId=${testId}`);
-        return;
-      }
-
-      // 2. If no insights exist - create new ones
-      // 3. If answers changed - rewrite existing insights
-      const resultsResponse = await fetch(`/api/tests/${testId}/results`, {
-        method: hasExistingInsights ? "PUT" : "POST", // Use PUT to update existing insights
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ forceUpdate: hasAnswersChanged }),
-      });
-
-      if (!resultsResponse.ok) {
-        throw new Error("Failed to save final results");
-      }
-
-      // Calculate ideology based on final scores
-      const ideologyResponse = await fetch("/api/ideology", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(roundedScores),
-      });
-
-      if (!ideologyResponse.ok) {
-        throw new Error("Failed to calculate ideology");
-      }
-
-      router.push(`/insights?testId=${testId}`);
+      }, 500);
     } catch (error) {
       console.error("Error ending test:", error);
       setIsSubmitting(false);
@@ -247,101 +341,35 @@ export default function IdeologyTest() {
       govt: scores.govt + multiplier * question.effect.govt,
       scty: scores.scty + multiplier * question.effect.scty,
     };
+    
+    // Update scores atom
     setScores(updatedScores);
+    
+    // Update test progress atom
+    setTestProgress(prev => ({
+      ...prev,
+      [question.id]: multiplier,
+    }));
 
-    try {
-      const response = await fetch(`/api/tests/${testId}/progress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          questionId: question.id,
-          answer: multiplier,
-          currentQuestion: question.id,
-          scores: updatedScores,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save progress");
-      }
-
-      setUserAnswers((prev) => ({
-        ...prev,
-        [question.id]: multiplier,
-      }));
-
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-      }
-    } catch (error) {
-      console.error("Error saving progress:", error);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentQuestion < totalQuestions - 1) {
-      const nextQuestion = currentQuestion + 1;
-      setCurrentQuestion(nextQuestion);
-
-      try {
-        await fetch(`/api/tests/${testId}/progress`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            currentQuestion: questions[nextQuestion].id,
-            scores,
-          }),
-        });
-      } catch (error) {
-        console.error("Error saving progress:", error);
-      }
+      setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  const handlePrevious = async () => {
+  const handlePrevious = () => {
     if (currentQuestion > 0) {
-      const prevQuestion = currentQuestion - 1;
-      setCurrentQuestion(prevQuestion);
-
-      try {
-        await fetch(`/api/tests/${testId}/progress`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            currentQuestion: questions[prevQuestion].id,
-            scores,
-          }),
-        });
-      } catch (error) {
-        console.error("Error saving progress:", error);
-      }
+      setCurrentQuestion(currentQuestion - 1);
     }
   };
 
-  const handleLeaveTest = async () => {
-    try {
-      await fetch(`/api/tests/${testId}/progress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          currentQuestion: questions[currentQuestion].id,
-          scores,
-        }),
-      });
-
-      router.push("/test-selection");
-    } catch (error) {
-      console.error("Error saving progress:", error);
-      router.push("/test-selection");
-    }
+  const handleLeaveTest = () => {
+    router.push("/test-selection");
   };
 
   if (loading) return <LoadingSpinner />;
@@ -353,6 +381,7 @@ export default function IdeologyTest() {
     return <div className="text-white text-center">No questions found.</div>;
   }
 
+  // Rest of the component remains the same
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#387478] to-[#2A5A5E] p-4">
       <div className="max-w-xl w-full">
@@ -386,7 +415,7 @@ export default function IdeologyTest() {
           {/* Answer Options */}
           <div className="space-y-3 mb-10">
             {answerOptions.map((answer) => {
-              const isSelected = userAnswers[questions[currentQuestion].id] === answer.multiplier;
+              const isSelected = testProgress[questions[currentQuestion].id] === answer.multiplier;
               return (
                 <button
                   key={`${answer.label}-${answer.multiplier}`}

@@ -29,19 +29,21 @@ export default function ResultsPage() {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const loadMockData = () => {
       try {
-        const response = await fetch("/api/tests");
-        const data = await response.json();
+        const mockTest = {
+          testId: "1",
+          testName: "Political Values Test"
+        };
 
-        const transformedResults = data.tests.map((test: Test) => ({
-          title: test.testName || "Political Values Test",
+        const transformedResults = [{
+          title: mockTest.testName,
           backgroundColor: "#387478",
           iconBgColor: "#2C5154",
           Icon: Globe,
           isEnabled: true,
-          testId: test.testId,
-        }));
+          testId: mockTest.testId,
+        }];
 
         const comingSoonCards = [
           {
@@ -69,13 +71,13 @@ export default function ResultsPage() {
 
         setTestResults([...transformedResults, ...comingSoonCards]);
       } catch (error) {
-        console.error("Error fetching results:", error);
+        console.error("Error loading mock data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchResults();
+    loadMockData();
   }, []);
 
   const handleCardClick = (testId: string) => {
