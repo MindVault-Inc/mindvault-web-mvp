@@ -153,7 +153,7 @@ export default function Register() {
         <div className="w-screen h-full px-[34px] pt-[104px] pb-[70px] absolute top-0 bg-[#2c5154] rounded-b-[65px] shadow-[21px_38px_64.69999694824219px_3px_rgba(0,0,0,0.25)] overflow-hidden">
           <div className="max-w-md mx-auto">
             <h1 className="text-white text-[50px] font-medium leading-[50px]">
-              Let&apos;s get to know a little bit about you...
+              Nos gustaría conocerte un poco más...
             </h1>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function Register() {
 
       <div className="w-full max-w-md p-4 mt-4">
         <p className="text-center text-[#232931] text-base font-normal mb-8">
-          Please fill up the following spaces to begin.
+          Por favor, completa los siguientes campos para comenzar.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6 mb-20">
@@ -170,7 +170,7 @@ export default function Register() {
           )}
           <div className="space-y-2">
             <label htmlFor="name" className="text-[#232931] text-base">
-              Name
+              Nombre
             </label>
             <Input
               id="name"
@@ -189,7 +189,7 @@ export default function Register() {
 
           <div className="space-y-2">
             <label htmlFor="last_name" className="text-[#232931] text-base">
-              Last Name
+              Apellido
             </label>
             <Input
               id="last_name"
@@ -208,7 +208,7 @@ export default function Register() {
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-[#232931] text-base">
-              Email
+              Correo Electrónico
             </label>
             <Input
               id="email"
@@ -225,7 +225,7 @@ export default function Register() {
 
           <div className="space-y-2">
             <label htmlFor="age" className="text-[#232931] text-base">
-              Age
+              Edad
             </label>
             <select
               id="age"
@@ -238,7 +238,7 @@ export default function Register() {
               className="h-[30px] bg-[#d9d9d9] rounded-[20px] border-0 px-3 w-full text-black"
             >
               <option value="" className="text-gray-500">
-                Select age
+                Seleccionar edad
               </option>
               {Array.from({ length: 113 }, (_, i) => i + 18).map((age) => (
                 <option key={age} value={age} className="text-black">
@@ -250,7 +250,7 @@ export default function Register() {
 
           <div className="space-y-2">
             <label htmlFor="country" className="text-[#232931] text-base">
-              Country
+              País
             </label>
             <select
               id="country"
@@ -286,10 +286,10 @@ export default function Register() {
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2 " />
-                  Registering...
+                  Registrando...
                 </div>
               ) : (
-                "Complete Registration"
+                "Completar Registro"
               )}
             </FilledButton>
           </div>
