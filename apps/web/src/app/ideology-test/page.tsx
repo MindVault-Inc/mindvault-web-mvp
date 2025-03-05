@@ -10,113 +10,46 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { atom, useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-
-// Mock data @AlvaroLazarus change this
-const mockQuestions: Question[] = [
-  {
-    id: 1,
-    question: "Economic freedom is more important than economic equality.",
-    effect: { econ: 10, dipl: 0, govt: 0, scty: 0 }
-  },
-  {
-    id: 2,
-    question: "Government intervention in the economy is necessary to protect citizens.",
-    effect: { econ: -10, dipl: 0, govt: 0, scty: 0 }
-  },
-  {
-    id: 3,
-    question: "International cooperation is more beneficial than national self-interest.",
-    effect: { econ: 0, dipl: 10, govt: 0, scty: 0 }
-  },
-  {
-    id: 4,
-    question: "Military action is sometimes necessary to protect national interests.",
-    effect: { econ: 0, dipl: -10, govt: 0, scty: 0 }
-  },
-  {
-    id: 5,
-    question: "Civil liberties are more important than security concerns.",
-    effect: { econ: 0, dipl: 0, govt: 10, scty: 0 }
-  },
-  {
-    id: 6,
-    question: "Strong government authority is needed to maintain social order.",
-    effect: { econ: 0, dipl: 0, govt: -10, scty: 0 }
-  },
-  {
-    id: 7,
-    question: "Traditional values should guide social progress.",
-    effect: { econ: 0, dipl: 0, govt: 0, scty: -10 }
-  },
-  {
-    id: 8,
-    question: "Society should embrace social change and progressive values.",
-    effect: { econ: 0, dipl: 0, govt: 0, scty: 10 }
-  }
-];
+import { questionsAtom } from "@/data/questions";
+import { Insight, Scores, insightsAtom, scoresAtom, ideologyAtom } from "@/atoms/insights";
 
 // Define types for our atoms
 interface TestProgress {
   [questionId: number]: number; // questionId -> multiplier
 }
 
-interface Scores {
-  econ: number;
-  dipl: number;
-  govt: number;
-  scty: number;
-}
-
-interface Insight {
-  category: string;
-  percentage: number;
-  insight: string;
-  description: string;
-  left_label: string;
-  right_label: string;
-  values: {
-    left: number;
-    right: number;
-    label: string;
-  };
-}
-
 // Create atoms with localStorage persistence
 const testProgressAtom = atomWithStorage<TestProgress>("test-progress", {});
-const scoresAtom = atomWithStorage<Scores>("test-scores", { econ: 0, dipl: 0, govt: 0, scty: 0 });
-const insightsAtom = atomWithStorage<Record<string, Insight[]>>("test-insights", {});
-const ideologyAtom = atomWithStorage<string>("test-ideology", "");
 const testCompletedAtom = atomWithStorage<boolean>("test-completed", false);
 
+// Answer options in Spanish
 const answerOptions = [
-  { label: "Strongly Agree", multiplier: 1.0 },
-  { label: "Agree", multiplier: 0.5 },
+  { label: "Totalmente de Acuerdo", multiplier: 1.0 },
+  { label: "De Acuerdo", multiplier: 0.5 },
   { label: "Neutral", multiplier: 0.0 },
-  { label: "Disagree", multiplier: -0.5 },
-  { label: "Strongly Disagree", multiplier: -1.0 },
+  { label: "En Desacuerdo", multiplier: -0.5 },
+  { label: "Totalmente en Desacuerdo", multiplier: -1.0 },
 ];
 
-// Mock ideologies based on scores
-// @AlvaroLazarus change this TO ACTUAL IDEOLOGIES OF 8VALUES
+// Generate ideology based on scores
 const getIdeology = (scores: Scores): string => {
   const { econ, dipl, govt, scty } = scores;
   
-  if (econ > 60 && govt > 60) return "Libertarian";
-  if (econ < 40 && govt < 40) return "Authoritarian Left";
-  if (econ > 60 && govt < 40) return "Authoritarian Right";
-  if (econ < 40 && govt > 60) return "Libertarian Left";
-  if (econ > 60) return "Right-Wing";
-  if (econ < 40) return "Left-Wing";
-  if (govt > 60) return "Libertarian Centrist";
-  if (govt < 40) return "Authoritarian Centrist";
-  if (scty > 60) return "Progressive Centrist";
-  if (scty < 40) return "Traditional Centrist";
+  if (econ > 60 && govt > 60) return "Libertario";
+  if (econ < 40 && govt < 40) return "Izquierda Autoritaria";
+  if (econ > 60 && govt < 40) return "Derecha Autoritaria";
+  if (econ < 40 && govt > 60) return "Izquierda Libertaria";
+  if (econ > 60) return "Derecha";
+  if (econ < 40) return "Izquierda";
+  if (govt > 60) return "Centrista Libertario";
+  if (govt < 40) return "Centrista Autoritario";
+  if (scty > 60) return "Centrista Progresista";
+  if (scty < 40) return "Centrista Tradicional";
   
-  return "Centrist";
+  return "Centrista";
 };
 
-// Generate mock insights based on scores
-// @AlvaroLazarus change this TO THE PROPER INSIGHTS OF 8VALUES
+// Generate insights based on scores
 const generateInsights = (scores: Scores): Record<string, Insight[]> => {
   const categories = ["econ", "dipl", "govt", "scty"];
   const insights: Record<string, Insight[]> = {};
@@ -126,8 +59,8 @@ const generateInsights = (scores: Scores): Record<string, Insight[]> => {
     const insight: Insight = {
       category,
       percentage: score,
-      insight: `Your ${category.toUpperCase()} score is ${score}%`,
-      description: `This indicates your position on the ${getCategoryName(category)} spectrum.`,
+      insight: `Tu puntuación en ${getCategoryName(category)} es ${score}%`,
+      description: `Esto indica tu posición en el espectro de ${getCategoryName(category)}.`,
       left_label: getLeftLabel(category),
       right_label: getRightLabel(category),
       values: {
@@ -142,34 +75,34 @@ const generateInsights = (scores: Scores): Record<string, Insight[]> => {
   return insights;
 };
 
-// Helper functions for insight generation
+// Helper functions for insight generation in Spanish
 const getCategoryName = (category: string): string => {
   switch (category) {
-    case "econ": return "Economic";
-    case "dipl": return "Diplomatic";
-    case "govt": return "Government";
-    case "scty": return "Societal";
+    case "econ": return "Economía";
+    case "dipl": return "Diplomacia";
+    case "govt": return "Gobierno";
+    case "scty": return "Sociedad";
     default: return category;
   }
 };
 
 const getLeftLabel = (category: string): string => {
   switch (category) {
-    case "econ": return "Equality";
-    case "dipl": return "Nation";
-    case "govt": return "Authority";
-    case "scty": return "Tradition";
-    default: return "Left";
+    case "econ": return "Igualdad";
+    case "dipl": return "Nación";
+    case "govt": return "Autoridad";
+    case "scty": return "Tradición";
+    default: return "Izquierda";
   }
 };
 
 const getRightLabel = (category: string): string => {
   switch (category) {
-    case "econ": return "Markets";
-    case "dipl": return "Globe";
-    case "govt": return "Liberty";
-    case "scty": return "Progress";
-    default: return "Right";
+    case "econ": return "Mercados";
+    case "dipl": return "Mundo";
+    case "govt": return "Libertad";
+    case "scty": return "Progreso";
+    default: return "Derecha";
   }
 };
 
@@ -180,7 +113,7 @@ export default function IdeologyTest() {
 
   // Local state
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [questions] = useState<Question[]>(mockQuestions);
+  const [questions] = useAtom(questionsAtom);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -267,9 +200,9 @@ export default function IdeologyTest() {
     const answeredQuestions = Object.keys(testProgress).length;
     if (answeredQuestions < questions.length) {
       setError(
-        `Please answer all questions before submitting. You have ${
+        `Por favor responde todas las preguntas antes de enviar. Te quedan ${
           questions.length - answeredQuestions
-        } questions remaining.`,
+        } preguntas.`,
       );
       return;
     }
@@ -312,7 +245,7 @@ export default function IdeologyTest() {
       
       // Generate insights based on scores
       const generatedInsights = generateInsights(roundedScores);
-      setInsights(generatedInsights);
+      setInsights(Object.values(generatedInsights).flat());
       
       // Calculate ideology based on scores
       const calculatedIdeology = getIdeology(roundedScores);
@@ -378,27 +311,26 @@ export default function IdeologyTest() {
     questions.length === 0 ||
     currentQuestion >= questions.length
   ) {
-    return <div className="text-white text-center">No questions found.</div>;
+    return <div className="text-white text-center">No se encontraron preguntas.</div>;
   }
 
-  // Rest of the component remains the same
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#387478] to-[#2A5A5E] p-4">
-      <div className="max-w-xl w-full">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#387478] to-[#2A5A5E] p-4 md:p-8">
+      <div className="max-w-xl w-full md:max-w-2xl lg:max-w-3xl">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#2C5154] rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+          className="bg-[#2C5154] rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
         >
           {/* Question Counter */}
-          <div className="text-center mb-6">
-            <h1 className="text-white text-2xl font-semibold">
-              Question {currentQuestion + 1} of {totalQuestions}
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-white text-2xl font-semibold sm:text-3xl md:text-4xl">
+              Pregunta {currentQuestion + 1} de {totalQuestions}
             </h1>
           </div>
 
           {/* Progress Bar */}
-          <div className="flex justify-center mb-10">
+          <div className="flex justify-center mb-8 md:mb-10 lg:mb-12">
             <ProgressBar 
               progress={((currentQuestion + 1) / totalQuestions) * 100} 
               variant="warning"
@@ -406,21 +338,21 @@ export default function IdeologyTest() {
           </div>
 
           {/* Question */}
-          <div className="text-center mb-8">
-            <h2 className="text-white text-xl font-medium leading-relaxed">
+          <div className="text-center mb-8 md:mb-10">
+            <h2 className="text-white text-xl font-medium leading-relaxed sm:text-2xl md:text-3xl md:leading-relaxed">
               {questions[currentQuestion].question}
             </h2>
           </div>
 
           {/* Answer Options */}
-          <div className="space-y-3 mb-10">
+          <div className="space-y-3 mb-10 md:space-y-4 lg:max-w-2xl lg:mx-auto">
             {answerOptions.map((answer) => {
               const isSelected = testProgress[questions[currentQuestion].id] === answer.multiplier;
               return (
                 <button
                   key={`${answer.label}-${answer.multiplier}`}
                   onClick={() => handleAnswer(answer.multiplier)}
-                  className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 ${
+                  className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all duration-200 sm:py-4 md:text-lg ${
                     isSelected
                       ? "bg-[#387478] border-l-4 border-[#E36C59]"
                       : "bg-[#387478]/70 hover:bg-[#387478] border-l-4 border-transparent"
@@ -428,7 +360,7 @@ export default function IdeologyTest() {
                 >
                   <div className="flex items-center">
                     <div
-                      className={`w-4 h-4 rounded-full mr-3 ${
+                      className={`w-4 h-4 rounded-full mr-3 md:w-5 md:h-5 ${
                         isSelected ? "bg-[#E36C59]" : "border border-white"
                       }`}
                     >
@@ -442,12 +374,12 @@ export default function IdeologyTest() {
           </div>
 
           {/* Navigation */}
-          <div className="flex justify-between">
+          <div className="flex justify-between md:px-8 lg:px-12">
             {currentQuestion > 0 && (
               <button
                 onClick={handlePrevious}
                 disabled={currentQuestion === 0}
-                className={`px-6 py-2 rounded-full transition-colors ${
+                className={`px-6 py-2 rounded-full transition-colors md:px-8 md:py-3 md:text-lg ${
                   currentQuestion === 0
                     ? "bg-[#1E3B3E] text-[#5A7A7D] cursor-not-allowed"
                     : "bg-[#E36C59] text-white hover:bg-[#D05A48]"
@@ -455,7 +387,7 @@ export default function IdeologyTest() {
               >
                 <div className="flex items-center">
                   <ChevronLeft className="w-5 h-5 mr-1" />
-                  Previous
+                  Anterior
                 </div>
               </button>
             )}
@@ -464,24 +396,24 @@ export default function IdeologyTest() {
               <button
                 onClick={handleEndTest}
                 disabled={isSubmitting}
-                className={`px-6 py-2 rounded-full transition-colors ${
+                className={`px-6 py-2 rounded-full transition-colors md:px-8 md:py-3 md:text-lg ${
                   isSubmitting
                     ? "bg-[#1E3B3E] text-[#5A7A7D] cursor-not-allowed"
                     : "bg-[#E36C59] text-white hover:bg-[#D05A48]"
                 }`}
               >
                 <div className="flex items-center">
-                  {isSubmitting ? "Saving..." : "End Test"}
+                  {isSubmitting ? "Guardando..." : "Finalizar Test"}
                   <ChevronRight className="w-5 h-5 ml-1" />
                 </div>
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="px-6 py-2 rounded-full transition-colors bg-[#E36C59] text-white hover:bg-[#D05A48]"
+                className="px-6 py-2 rounded-full transition-colors bg-[#E36C59] text-white hover:bg-[#D05A48] md:px-8 md:py-3 md:text-lg"
               >
                 <div className="flex items-center">
-                  Next
+                  Siguiente
                   <ChevronRight className="w-5 h-5 ml-1" />
                 </div>
               </button>
@@ -489,8 +421,8 @@ export default function IdeologyTest() {
           </div>
 
           {error && (
-            <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
-              <p className="text-red-400 text-sm text-center">{error}</p>
+            <div className="mt-4 bg-red-500/10 border border-red-500/50 rounded-lg p-3 md:p-4 md:mt-6">
+              <p className="text-red-400 text-sm text-center md:text-base">{error}</p>
             </div>
           )}
         </motion.div>
