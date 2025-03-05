@@ -106,49 +106,49 @@ export default function TestsPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="relative mb-8 overflow-hidden rounded-b-[4rem] border-b border-brand-tertiary/20 bg-brand-tertiary p-10 pb-12 pt-16 shadow-lg">
+    <div className="min-h-screen bg-white">
+      <div className="relative mb-4 sm:mb-6 lg:mb-12 overflow-hidden rounded-b-[1.5rem] sm:rounded-b-[2.5rem] lg:rounded-b-[4rem] border-b border-brand-tertiary/20 bg-brand-tertiary px-4 sm:px-8 lg:px-16 py-8 sm:py-10 lg:py-20 shadow-lg">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
 
         <motion.div
-          className="relative z-10 mx-auto max-w-md space-y-4 text-center"
+          className="relative z-10 mx-auto max-w-xs sm:max-w-sm lg:max-w-2xl space-y-4 sm:space-y-6 lg:space-y-8 text-center"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="space-y-3 text-center">
-            <Brain className="mx-auto h-10 w-10 text-[#E36C59]" />
-            <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-4xl">
-              Available Tests
+          <div className="space-y-3 sm:space-y-4 lg:space-y-6 text-center">
+            <Brain className="mx-auto h-8 w-8 sm:h-10 sm:w-10 lg:h-14 lg:w-14 text-[#E36C59]" />
+            <h1 className="text-xl sm:text-3xl lg:text-5xl font-bold tracking-tight text-slate-100">
+              Pruebas Disponibles
             </h1>
           </div>
 
-          <p className="mx-auto max-w-sm text-base font-medium text-slate-200 sm:text-lg">
-            Explore our collection of tests to understand yourself better
+          <p className="mx-auto max-w-[280px] sm:max-w-sm lg:max-w-xl text-sm sm:text-base lg:text-xl font-medium text-slate-200 px-2 sm:px-4 lg:px-0">
+            Explora nuestra colección de pruebas para entenderte mejor
           </p>
 
           <SearchBar
             onSearch={handleSearch}
-            placeholder="Search for tests..."
-            className="mx-auto w-full max-w-sm"
+            placeholder="Buscar pruebas..."
+            className="mx-auto w-full max-w-[280px] sm:max-w-sm lg:max-w-md"
           />
 
-          <div className="mt-4 rounded-xl bg-white/10 p-3 backdrop-blur-sm">
-            <p className="text-center text-sm text-white/90">
-              Achievements coming soon! 🏆
+          <div className="mt-4 sm:mt-6 lg:mt-8 rounded-lg sm:rounded-xl bg-white/10 p-2 sm:p-3 lg:p-4 backdrop-blur-sm">
+            <p className="text-center text-xs sm:text-sm lg:text-base text-white/90">
+              ¡Logros próximamente! 🏆
             </p>
           </div>
         </motion.div>
       </div>
 
       <motion.div
-        className="flex flex-col items-center px-4 pb-20 sm:px-6 md:px-8"
+        className="flex flex-col items-center px-4 sm:px-8 lg:px-16 pb-8 sm:pb-12 lg:pb-24 bg-gray-50"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="w-full max-w-7xl">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <TestCard
               title={testData.title}
               totalQuestions={testData.totalQuestions}
@@ -160,7 +160,7 @@ export default function TestsPage() {
             />
             <div className="pointer-events-none opacity-40">
               <TestCard
-                title="Personality Test"
+                title="Test de Personalidad"
                 totalQuestions={50}
                 answeredQuestions={0}
                 achievements={[]}
@@ -170,8 +170,8 @@ export default function TestsPage() {
           </div>
         </div>
 
-        <p className="mt-8 text-center text-sm font-medium text-gray-500">
-          More tests coming soon! Stay tuned 🎉
+        <p className="mt-6 sm:mt-8 lg:mt-12 text-center text-sm sm:text-base lg:text-lg font-medium text-gray-600">
+          ¡Más pruebas próximamente! Mantente atento 🎉
         </p>
       </motion.div>
     </div>
