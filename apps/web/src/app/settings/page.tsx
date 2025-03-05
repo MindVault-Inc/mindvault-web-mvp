@@ -7,10 +7,8 @@ import {
   LoadingSpinner,
 } from "@/components/ui/feedback";
 import { MembershipCard } from "@/components/ui/cards";
-import { NotificationsToggle } from "@/components/ui/NotificationsToggle";
 import { SettingsCard } from "@/components/ui/cards";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
-import { clearVerificationSession } from "@/hooks/useVerification";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -105,7 +103,6 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      clearVerificationSession();
 
       const response = await fetch("/api/auth/logout", {
         method: "POST",
@@ -220,7 +217,6 @@ export default function SettingsPage() {
               {
                 Icon: Bell,
                 label: "Notifications",
-                element: <NotificationsToggle />,
               },
               { Icon: Moon, label: "Dark Theme", element: <ToggleSwitch /> },
               {
