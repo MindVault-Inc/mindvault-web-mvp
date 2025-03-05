@@ -27,13 +27,30 @@ export default function ResultsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [isMobileView, setIsMobileView] = useState(true);
+
+  // Check viewport size on mount and resize
+  useEffect(() => {
+    const checkViewportSize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkViewportSize();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkViewportSize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkViewportSize);
+  }, []);
 
   useEffect(() => {
     const loadMockData = () => {
       try {
         const mockTest = {
           testId: "1",
-          testName: "Political Values Test"
+          testName: "Test de Valores Políticos"
         };
 
         const transformedResults = [{
@@ -47,21 +64,21 @@ export default function ResultsPage() {
 
         const comingSoonCards = [
           {
-            title: "Personality Test (Coming Soon)",
+            title: "Test de Personalidad (Próximamente)",
             backgroundColor: "#778BAD",
             iconBgColor: "#4A5A7A",
             Icon: Heart,
             isEnabled: false,
           },
           {
-            title: "Coming Soon",
+            title: "Próximamente",
             backgroundColor: "#DA9540",
             iconBgColor: "#A66B1E",
             Icon: Star,
             isEnabled: false,
           },
           {
-            title: "Coming Soon",
+            title: "Próximamente",
             backgroundColor: "#D87566",
             iconBgColor: "#A44C3D",
             Icon: Trophy,
@@ -89,35 +106,35 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-brand-tertiary rounded-b-[50px] shadow-lg pb-8 sm:pb-14 mb-6 sm:mb-8 relative overflow-hidden">
+    <div className="min-h-screen w-full">
+      <div className="bg-brand-tertiary rounded-b-[50px] md:rounded-b-[80px] shadow-lg pb-8 sm:pb-14 md:pb-20 mb-6 sm:mb-8 md:mb-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
         <motion.div
-          className="relative z-10 w-full max-w-2xl mx-auto px-4 pt-16 sm:pt-20 space-y-4"
+          className="relative z-10 w-full max-w-2xl mx-auto px-4 md:px-8 pt-16 sm:pt-20 md:pt-24 space-y-4 md:space-y-6"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="text-center space-y-3">
-            <FileChartColumn className="h-10 w-10 mx-auto text-[#E36C59]" />
-            <h1 className="text-center text-white text-3xl sm:text-4xl md:text-5xl font-bold leading-tight sm:leading-[50px] mb-3 sm:mb-4">
-              Tests Results
+          <div className="text-center space-y-3 md:space-y-4">
+            <FileChartColumn className="h-10 w-10 md:h-12 md:w-12 mx-auto text-[#E36C59]" />
+            <h1 className="text-center text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight sm:leading-[50px] md:leading-[60px] mb-3 sm:mb-4 md:mb-6">
+              Resultados de Pruebas
             </h1>
           </div>
 
-          <p className="text-center text-[#C9CDCE] text-lg font-normal leading-[25px]">
-            Insights based on <span className="font-bold">your results</span>
+          <p className="text-center text-[#C9CDCE] text-lg md:text-xl font-normal leading-[25px] md:leading-[30px]">
+            Información basada en <span className="font-bold">tus resultados</span>
           </p>
         </motion.div>
       </div>
 
       <motion.div
-        className="w-full max-w-7xl mx-auto px-4 pb-20"
+        className="w-full max-w-7xl mx-auto px-4 md:px-8 pb-20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <div className="grid grid-cols-2 gap-6 justify-items-center max-w-[400px] mx-auto">
+        <div className={`grid ${isMobileView ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-6 md:gap-8 justify-items-center max-w-[400px] md:max-w-none mx-auto`}>
           {testResults.map((test) => (
             <motion.div
               key={test.title}
