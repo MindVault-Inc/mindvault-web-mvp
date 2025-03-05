@@ -7,26 +7,85 @@ import { InsightResultCard } from "@/components/ui/cards/InsightResultCard";
 import { LoadingSpinner } from "@/components/ui/feedback/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { BookOpen } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 
 
+interface TestProgress {
+  [questionId: number]: number;
+}
+
+interface Scores {
+  econ: number;
+  dipl: number;
+  govt: number;
+  scty: number;
+}
+
+// Use the same atoms as in ideology-test
+const testProgressAtom = atomWithStorage<TestProgress>("test-progress", {});
+const scoresAtom = atomWithStorage<Scores>("test-scores", { econ: 0, dipl: 0, govt: 0, scty: 0 });
+const insightsAtom = atomWithStorage<Record<string, Insight[]>>("test-insights", {});
+const ideologyAtom = atomWithStorage<string>("test-ideology", "");
+const testCompletedAtom = atomWithStorage<boolean>("test-completed", false);
+
+// Mock public figures data
+// @Alvaro CHANGE THIS TO PUBLIC FIGURES WITH THEIR IDEOLOGY
+const publicFigures = [
+  { name: "Bernie Sanders", scores: { econ: 20, dipl: 80, govt: 70, scty: 90 } },
+  { name: "Barack Obama", scores: { econ: 45, dipl: 70, govt: 60, scty: 70 } },
+  { name: "Joe Biden", scores: { econ: 40, dipl: 65, govt: 55, scty: 65 } },
+  { name: "Donald Trump", scores: { econ: 70, dipl: 30, govt: 40, scty: 30 } },
+  { name: "Ron DeSantis", scores: { econ: 75, dipl: 25, govt: 30, scty: 20 } },
+  { name: "Alexandria Ocasio-Cortez", scores: { econ: 15, dipl: 75, govt: 65, scty: 85 } },
+];
+
+// Function to find closest public figure match
+// TODO: REMOVE THIS
+const findClosestMatch = (userScores: Scores): string => {
+  let closestMatch = "";
+  let smallestDifference = Number.MAX_VALUE;
+  
+  publicFigures.forEach(figure => {
+    const difference = 
+      Math.abs(userScores.econ - figure.scores.econ) +
+      Math.abs(userScores.dipl - figure.scores.dipl) +
+      Math.abs(userScores.govt - figure.scores.govt) +
+      Math.abs(userScores.scty - figure.scores.scty);
+    
+    if (difference < smallestDifference) {
+      smallestDifference = difference;
+      closestMatch = figure.name;
+    }
+  });
+  
+  return closestMatch;
+};
+
 export default function InsightsPage() {
   const router = useRouter();
-  const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isProUser, setIsProUser] = useState(false);
   const [fullAnalysis, setFullAnalysis] = useState<string>("");
-  const [ideology, setIdeology] = useState<string>("");
   const searchParams = useSearchParams();
-  const [scores, setScores] = useState({ econ: 0, dipl: 0, govt: 0, scty: 0 });
-  const [publicFigure, setPublicFigure] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCanvasLoading, setIsCanvasLoading] = useState(true);
   const [isGeminiLoading, setIsGeminiLoading] = useState(false);
+  const [publicFigure, setPublicFigure] = useState("");
+  
+  // Get data from Jotai atoms
+  const [scores] = useAtom(scoresAtom);
+  const [ideology] = useAtom(ideologyAtom);
+  const [insightsData] = useAtom(insightsAtom);
+  const [testCompleted] = useAtom(testCompletedAtom);
+  
+  // Convert insights data to array format
+  const [insights, setInsights] = useState<Insight[]>([]);
 
   // Emit modal state changes
   useEffect(() => {
@@ -46,57 +105,40 @@ export default function InsightsPage() {
 
   const testId = searchParams.get("testId");
 
+  // Load data from atoms instead of API calls
   useEffect(() => {
-    async function fetchInsights() {
+    const loadData = () => {
       try {
-        // Check user's pro status
-        const userResponse = await fetch("/api/user/subscription");
-        if (!userResponse.ok) {
-          throw new Error("Failed to fetch subscription status");
+        // Check if test is completed
+        if (!testCompleted) {
+          router.replace("/ideology-test");
+          return;
         }
-        const userData = await userResponse.json();
-        setIsProUser(userData.isPro);
-
-        // Fetch ideology
-        const ideologyResponse = await fetch("/api/ideology");
-        if (ideologyResponse.ok) {
-          const ideologyData = await ideologyResponse.json();
-          setIdeology(ideologyData.ideology);
-        }
-
-        // Fetch insights
-        const response = await fetch(`/api/insights/${testId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch insights");
-        }
-        const data = await response.json();
-        setInsights(data.insights);
-
-        // Get scores from database
-        const scoresResponse = await fetch(`/api/tests/${testId}/progress`);
-        if (!scoresResponse.ok) {
-          throw new Error("Failed to fetch scores");
-        }
-        const scoresData = await scoresResponse.json();
-        setScores(scoresData.scores);
-
-        // Get public figure match
-        const figureResponse = await fetch("/api/public-figures");
-        if (!figureResponse.ok) {
-          throw new Error("Failed to fetch public figure match");
-        }
-        const figureData = await figureResponse.json();
-        setPublicFigure(figureData.celebrity || "Unknown Match");
-
+        
+        // Set pro user status (mock for now)
+        setIsProUser(Math.random() > 0.5); // Random for demo purposes
+        
+        // Process insights from atom
+        const allInsights: Insight[] = [];
+        Object.values(insightsData).forEach(categoryInsights => {
+          categoryInsights.forEach(insight => {
+            allInsights.push(insight);
+          });
+        });
+        setInsights(allInsights);
+        
+        // Find closest public figure match
+        const match = findClosestMatch(scores);
+        setPublicFigure(match);
+        
       } catch (error) {
-        console.error("Error fetching insights:", error);
+        console.error("Error loading data:", error);
       } finally {
         setLoading(false);
       }
     }
-
-    void fetchInsights();
-  }, [testId]);
+    loadData();
+  }, [testCompleted, insightsData, scores, router]);
 
   // Separate effect for Gemini API call
   useEffect(() => {
