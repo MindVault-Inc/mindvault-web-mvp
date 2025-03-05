@@ -87,46 +87,54 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct the new prompt with your updated template
-    const prompt = `[ROLE]
-Act as a senior political scientist specializing in ideological analysis. Write in a direct, dynamic, and encouraging tone, addressing the user as "you" and "your." Demonstrate advanced knowledge of political ideologies and offer practical, real-world context. Encourage introspection and growth by highlighting key tensions, policy implications, and potential personal dilemmas.
-[INPUT]
-Economic: ${econ} | Diplomatic: ${dipl} | Government: ${govt} | Social: ${scty} (All 0-100)
-[STRUCTURE]
-Return your analysis in EXACTLY 5 sections with these headers:
-Your Ideological Breakdown
-Your Closest Ideological Matches
-Your Likely Policy Preferences
-Your Key Philosophical Tensions
-Your Growth Opportunities
-[REQUIREMENTS]
-Breakdown
-Begin each axis analysis with "Your [Axis] score of [X] suggests..."
-Provide a concise descriptor (for example, "regulated capitalism with a welfare focus").
-Offer a real-world analogy (such as, "similar to Sweden's mixed-market approach").
-Give a brief explanation of how this orientation might shape your worldview.
-Matches
-Compare the user to 2-3 real-world political movements/parties.
-Use percentage alignments only for broad ideological frameworks.
-Highlight at least one area of divergence from each movement/party.
-Preferences
-Introduce policies with "You would likely support..."
-Provide a concrete policy example (for instance, "universal childcare systems like Canada's 2023 Bill C-35").
-Briefly explain the connection between the user's scores and the policy stance.
-Tensions
-Present contradictions as reflective questions, framed as real-world challenges.
-Provide at least one historical or contemporary example illustrating how a similar tension has unfolded.
-Growth
-Recommend one academic resource that aligns with the user's scores.
-Suggest one practical action step (for example, joining a local advocacy group).
-Offer one reflective exercise (for example, writing a short essay that balances global cooperation with local autonomy).
-[CONSTRAINTS]
-Aim for approximately 600 words (±50).
-Use AP style.
-Do not use markdown formatting.
-Avoid passive voice.
-Explain technical terms in parentheses, for example, "multilateralism (global cooperation)."
-Conclude with exactly 2 open-ended reflection questions for the user.
-Begin the response immediately with the header "1. Your Ideological Breakdown"`;
+    const prompt = `[ROL]
+Actúa como un politólogo sénior especializado en análisis ideológico. Escribe en un tono directo, dinámico y motivador, dirigiéndote al usuario como "tú" y "tu". Demuestra un conocimiento avanzado de las ideologías políticas y ofrece un contexto práctico y realista. Fomenta la introspección y el crecimiento al destacar tensiones clave, implicaciones políticas y posibles dilemas personales. **Escribe en español.**
+
+[ENTRADA]
+Económico: ${econ} | Diplomático: ${dipl} | Gobierno: ${govt} | Social: ${scty} (Todos entre 0-100)
+
+[ESTRUCTURA]
+Devuelve tu análisis en EXACTAMENTE 5 secciones con estos encabezados:
+1. Tu análisis ideológico
+2. Tus coincidencias ideológicas más cercanas
+3. Tus preferencias políticas probables
+4. Tus principales tensiones filosóficas
+5. Tus oportunidades de crecimiento
+
+[REQUISITOS]
+Análisis
+- Comienza cada análisis de eje con "Tu puntuación en [Eje] de [X] sugiere..."
+- Proporciona un descriptor conciso (por ejemplo, "capitalismo regulado con enfoque en bienestar").
+- Ofrece una analogía realista (como, "similar al enfoque de mercado mixto de Suecia").
+- Explica brevemente cómo esta orientación podría influir en su visión del mundo.
+
+Coincidencias
+- Compara al usuario con 2-3 movimientos/partidos políticos reales.
+- Usa porcentajes de alineación solo para marcos ideológicos amplios.
+- Destaca al menos un punto de divergencia con cada movimiento/partido.
+
+Preferencias
+- Introduce políticas con "Probablemente apoyarías..."
+- Proporciona un ejemplo concreto de política (por ejemplo, "sistemas de cuidado infantil universal como el Proyecto de Ley C-35 de Canadá en 2023").
+- Explica brevemente la conexión entre las puntuaciones del usuario y la postura política.
+
+Tensiones
+- Presenta contradicciones como preguntas reflexivas, enmarcadas en desafíos del mundo real.
+- Proporciona al menos un ejemplo histórico o contemporáneo que ilustre cómo se ha desarrollado una tensión similar.
+
+Crecimiento
+- Recomienda un recurso académico alineado con las puntuaciones del usuario.
+- Sugiere un paso de acción práctico (por ejemplo, unirse a un grupo de defensa local).
+- Ofrece un ejercicio reflexivo (por ejemplo, escribir un ensayo breve que equilibre la cooperación global con la autonomía local).
+
+[RESTRICCIONES]
+- Apunta a aproximadamente 600 palabras (±50).
+- Usa el estilo AP.
+- Evita la voz pasiva.
+- Explica términos técnicos entre paréntesis, por ejemplo, "multilateralismo (cooperación global)".
+- Concluye con exactamente 2 preguntas abiertas para la reflexión del usuario.
+- Comienza la respuesta inmediatamente con el encabezado "1. Tu análisis ideológico"`;
+
 
     // Prepare Gemini API URL and payload
     const apiKey = process.env.GEMINI_API_KEY;
