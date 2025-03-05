@@ -2,12 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first approach with responsive overrides */
 html,
 body {
   width: 100vw;
   height: 100dvh;
   overscroll-behavior: none;
   overflow: hidden;
+}
+
+/* Media query for desktop */
+@media (min-width: 768px) {
+  html,
+  body {
+    overflow: auto; /* Allow scrolling on desktop */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
 }
 
 /* Replace 100vh with 100dvh for dynamic viewport height */
@@ -20,6 +30,16 @@ body {
   height: 100dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%; /* Ensure full width */
+}
+
+/* Desktop adjustments for scroll container */
+@media (min-width: 768px) {
+  .scroll-container {
+    overflow-y: visible; /* Let the page scroll normally on desktop */
+    height: auto;
+    min-height: 100dvh;
+  }
 }
 
 @layer base {
@@ -203,4 +223,3 @@ body {
     animation-delay: 0.3s;
   }
 }
-

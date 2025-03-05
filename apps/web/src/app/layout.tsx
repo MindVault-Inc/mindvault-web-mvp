@@ -18,7 +18,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "MindVault",
-  description: "Your journey toward understanding your true self begins here.",
+  description: "Tu viaje hacia la comprensión de tu verdadero yo comienza aquí.",
 };
 
 interface RootLayoutProps {
@@ -27,16 +27,13 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body
         className={`${spaceGrotesk.variable} bg-neutral-bg text-foreground antialiased`}
       >
           <ThemeProvider>
-            <div className="mx-auto w-full min-h-screen overflow-hidden">
-              <div className="mx-auto w-full max-w-[430px] min-h-screen">
-                <LayoutContent>{children}</LayoutContent>
-              </div>
-            </div>
+            {/* Removed nested divs and width constraints */}
+            <LayoutContent>{children}</LayoutContent>
           </ThemeProvider>
       </body>
     </html>

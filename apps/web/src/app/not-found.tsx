@@ -2,8 +2,8 @@
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#2C5154] p-4">
-      <div className="w-full max-w-md space-y-6 text-center">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#2C5154] p-4 md:p-8">
+      <div className="w-full max-w-full space-y-6 text-center md:max-w-3xl lg:max-w-4xl">
         <div
           className="animate-in fade-in slide-in-from-top-4 duration-700 inline-block rounded-full border
             border-white/10 bg-[#2C5154]/40 px-6 py-2 text-white shadow-lg backdrop-blur-sm"
@@ -30,12 +30,12 @@ export default function NotFound() {
 
         <div
           className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 rounded-3xl
-            border border-white/10 bg-[#2C5154]/40 p-8 shadow-xl backdrop-blur-sm"
+            border border-white/10 bg-[#2C5154]/40 p-8 shadow-xl backdrop-blur-sm md:p-10 mx-auto md:w-3/4 lg:w-2/3"
         >
-          <div className="space-y-6">
+          <div className="space-y-6 md:space-y-8">
             <div className="flex justify-center">
               <svg
-                className="h-24 w-24 animate-pulse text-[#E36C59]"
+                className="h-24 w-24 animate-pulse text-[#E36C59] md:h-28 md:w-28 lg:h-32 lg:w-32"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -50,13 +50,13 @@ export default function NotFound() {
               </svg>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white">
-              Page Not Found
+            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
+              Página No Encontrada
             </h1>
 
-            <p className="mx-auto max-w-sm text-lg text-white/80">
-              Oops! This page has embarked on an unexpected adventure.
-              Let&apos;s help you find your way back!
+            <p className="mx-auto max-w-sm text-lg text-white/80 md:max-w-lg lg:max-w-2xl md:text-xl">
+              ¡Ups! Esta página se ha embarcado en una aventura inesperada.
+              ¡Permítenos ayudarte a encontrar el camino de regreso!
             </p>
 
             <button
@@ -65,11 +65,12 @@ export default function NotFound() {
                 window.location.href = "/";
               }}
               className="mx-auto flex h-auto items-center gap-2 rounded-xl bg-[#E36C59] px-8 py-4 
-                font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-[#E36C59]/90"
-              aria-label="Go to Home"
+                font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-[#E36C59]/90
+                md:px-10 md:py-5 md:text-lg"
+              aria-label="Ir a Inicio"
             >
               <svg
-                className="h-5 w-5"
+                className="h-5 w-5 md:h-6 md:w-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -82,7 +83,7 @@ export default function NotFound() {
                   d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                 />
               </svg>
-              Go to Home
+              Ir a Inicio
             </button>
           </div>
         </div>
