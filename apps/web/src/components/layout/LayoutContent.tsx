@@ -2,7 +2,6 @@
 
 import { BottomNav } from "@/components/common";
 import { BackgroundEffect } from "@/components/ui/BackgroundEffect";
-import { LoadingOverlay } from "@/components/ui/feedback/LoadingOverlay";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -15,8 +14,24 @@ interface LayoutContentProps {
 
 export function LayoutContent({ children }: LayoutContentProps) {
   const pathname = usePathname();
-
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(true);
+
+  // Check viewport size on mount and resize
+  useEffect(() => {
+    const checkViewportSize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkViewportSize();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkViewportSize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkViewportSize);
+  }, []);
 
   // Page checks
   const pageStates = useMemo(
@@ -36,11 +51,8 @@ export function LayoutContent({ children }: LayoutContentProps) {
   // Auth refresh effect
   useEffect(() => {
     const { isSignInPage, isRegisterPage, isWelcomePage } = pageStates;
-
     if (isSignInPage || isRegisterPage || isWelcomePage) return;
-  }, [
-    pageStates,
-  ]);
+  }, [pageStates]);
 
   // Listen for share modal state changes from child components
   useEffect(() => {
@@ -56,8 +68,7 @@ export function LayoutContent({ children }: LayoutContentProps) {
   }, []);
 
   const getBackgroundVariant = (): BackgroundVariant => {
-    const { isSignInPage, isHomePage, isSettingsPage, isResultsPage } =
-      pageStates;
+    const { isSignInPage, isHomePage, isSettingsPage, isResultsPage } = pageStates;
 
     if (isSignInPage) return "signin";
     if (isHomePage) return "home";
@@ -74,39 +85,43 @@ export function LayoutContent({ children }: LayoutContentProps) {
     isIdeologyTest,
   } = pageStates;
 
-  // const showLoadingOverlay = !isSignInPage && !isRegisterPage && !isWelcomePage;
-
-  // if (
-  //   showLoadingOverlay
-  // ) {
-  //   return (
-  //     <>
-  //       <LoadingOverlay />
-  //       <div className="flex-grow opacity-0">{children}</div>
-  //     </>
-  //   );
-  // }
-
-  const showBanner =
-    !isSignInPage &&
-    !isRegisterPage &&
-    !isWelcomePage &&
-    !isTestInstructions &&
-    !isIdeologyTest;
-
   const showNav =
     !isSignInPage &&
     !isRegisterPage &&
     !isWelcomePage &&
     !isShareModalOpen;
 
+  // Show bottom nav only on mobile
+  const showBottomNav = showNav && isMobileView;
+  
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-bg">
+    // Removed any fixed width constraints, using full viewport width
+    <div className="flex min-h-screen flex-col bg-neutral-bg w-full">
       <BackgroundEffect variant={getBackgroundVariant()} />
-      <main className="scroll-container">
-        <div className={`flex-grow ${showNav ? "pb-16" : ""}`}>{children}</div>
+      
+      {/* Main content container */}
+      <main className="w-full min-h-screen">
+        <div className={`w-full ${showBottomNav ? "pb-16 md:pb-0" : ""}`}>
+          {/* For mobile view, keep constraint. For desktop, use different widths */}
+          <div className={isMobileView ? "w-full max-w-[430px] mx-auto" : "w-full px-0"}>
+            {children}
+          </div>
+        </div>
       </main>
-      {showNav && <div className="z-40 w-full max-w-[430px] fixed bottom-0 left-1/2 -translate-x-1/2"><BottomNav /></div>}
+      
+      {/* Bottom navigation for mobile only */}
+      {showBottomNav && (
+        <div className="z-40 w-full max-w-[430px] fixed bottom-0 left-1/2 -translate-x-1/2">
+          <BottomNav />
+        </div>
+      )}
+      
+      {/* Desktop navigation for larger screens */}
+      {showNav && !isMobileView && (
+        <div className="hidden md:block fixed top-0 right-0 p-4">
+          {/* Desktop navigation placeholder */}
+        </div>
+      )}
     </div>
   );
 }
