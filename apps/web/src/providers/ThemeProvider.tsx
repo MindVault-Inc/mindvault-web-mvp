@@ -11,7 +11,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-	theme: "dark",
+	theme: "light", // Default should be "light"
 	toggleTheme: () => undefined,
 });
 
@@ -20,7 +20,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-	const [theme, setTheme] = useState<Theme>("dark");
+	const [theme, setTheme] = useState<Theme>("light"); // Change this to "light"
 
 	useEffect(() => {
 		document.documentElement.classList.toggle("dark", theme === "dark");
